@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import "../styles/Auth.css";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -48,16 +47,29 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h1>Register</h1>
-        <p className="subtitle">Create your tenant account</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 px-4 py-12">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
+          Register
+        </h1>
+        <p className="text-center text-gray-600 mb-8">
+          Create your tenant account
+        </p>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="tenantName">Company Name</label>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label
+              htmlFor="tenantName"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Company Name
+            </label>
             <input
               type="text"
               id="tenantName"
@@ -66,11 +78,17 @@ const Register = () => {
               onChange={handleChange}
               placeholder="Your Company Name"
               required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="subdomain">Subdomain</label>
+          <div>
+            <label
+              htmlFor="subdomain"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Subdomain
+            </label>
             <input
               type="text"
               id="subdomain"
@@ -80,12 +98,20 @@ const Register = () => {
               placeholder="mycompany (3-63 characters)"
               pattern="[a-z0-9-]{3,63}"
               required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
             />
-            <small>Only lowercase letters, numbers, and hyphens</small>
+            <small className="text-gray-500 text-xs mt-1 block">
+              Only lowercase letters, numbers, and hyphens
+            </small>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="adminFullName">Your Full Name</label>
+          <div>
+            <label
+              htmlFor="adminFullName"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Your Full Name
+            </label>
             <input
               type="text"
               id="adminFullName"
@@ -94,11 +120,17 @@ const Register = () => {
               onChange={handleChange}
               placeholder="John Doe"
               required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="adminEmail">Email</label>
+          <div>
+            <label
+              htmlFor="adminEmail"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Email
+            </label>
             <input
               type="email"
               id="adminEmail"
@@ -107,11 +139,17 @@ const Register = () => {
               onChange={handleChange}
               placeholder="admin@company.com"
               required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="adminPassword">Password</label>
+          <div>
+            <label
+              htmlFor="adminPassword"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Password
+            </label>
             <input
               type="password"
               id="adminPassword"
@@ -121,16 +159,27 @@ const Register = () => {
               placeholder="Minimum 8 characters"
               minLength="8"
               required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
-        <p className="auth-footer">
-          Already have an account? <Link to="/login">Login here</Link>
+        <p className="text-center text-gray-600 mt-6">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-indigo-600 hover:text-indigo-700 font-semibold"
+          >
+            Login here
+          </Link>
         </p>
       </div>
     </div>

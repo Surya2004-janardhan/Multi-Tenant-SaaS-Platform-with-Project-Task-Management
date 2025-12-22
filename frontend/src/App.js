@@ -16,7 +16,6 @@ import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Users from "./pages/Users";
 
-
 function App() {
   return (
     <AuthProvider>
