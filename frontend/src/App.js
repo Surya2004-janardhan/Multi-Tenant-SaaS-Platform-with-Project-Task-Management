@@ -15,7 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import Users from "./pages/Users";
-import "./styles/App.css";
+
 
 function App() {
   return (

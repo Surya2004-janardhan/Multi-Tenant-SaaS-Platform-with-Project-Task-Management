@@ -40,7 +40,7 @@
 .stat-number {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .stat-text {
@@ -94,7 +94,7 @@
 }
 
 .project-item:hover {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
 }
 

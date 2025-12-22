@@ -11,7 +11,7 @@
 .nav-brand a {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .nav-links a:hover {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .nav-user {
