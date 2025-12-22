@@ -9,7 +9,11 @@ const isValidEmail = (email) => {
 const isValidSubdomain = (subdomain) => {
   // 3-63 characters, alphanumeric and hyphens, cannot start/end with hyphen
   const subdomainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
-  return subdomain.length >= 3 && subdomain.length <= 63 && subdomainRegex.test(subdomain);
+  return (
+    subdomain.length >= 3 &&
+    subdomain.length <= 63 &&
+    subdomainRegex.test(subdomain)
+  );
 };
 
 const isValidPassword = (password) => {
@@ -18,26 +22,26 @@ const isValidPassword = (password) => {
 };
 
 const isValidRole = (role) => {
-  const validRoles = ['super_admin', 'tenant_admin', 'user'];
+  const validRoles = ["super_admin", "tenant_admin", "user"];
   return validRoles.includes(role);
 };
 
-const isValidStatus = (status, type = 'tenant') => {
+const isValidStatus = (status, type = "tenant") => {
   const statusMap = {
-    tenant: ['active', 'suspended', 'trial'],
-    project: ['active', 'archived', 'completed'],
-    task: ['todo', 'in_progress', 'completed'],
+    tenant: ["active", "suspended", "trial"],
+    project: ["active", "archived", "completed"],
+    task: ["todo", "in_progress", "completed"],
   };
   return statusMap[type] && statusMap[type].includes(status);
 };
 
 const isValidPriority = (priority) => {
-  const validPriorities = ['low', 'medium', 'high'];
+  const validPriorities = ["low", "medium", "high"];
   return validPriorities.includes(priority);
 };
 
 const isValidPlan = (plan) => {
-  const validPlans = ['free', 'pro', 'enterprise'];
+  const validPlans = ["free", "pro", "enterprise"];
   return validPlans.includes(plan);
 };
 

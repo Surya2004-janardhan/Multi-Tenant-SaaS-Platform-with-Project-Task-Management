@@ -1,7 +1,7 @@
 // Hash Service
 // Password hashing and verification using bcrypt
 
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 
 const SALT_ROUNDS = 10;
 
@@ -11,8 +11,8 @@ const hashPassword = async (password) => {
     const hash = await bcrypt.hash(password, salt);
     return hash;
   } catch (error) {
-    console.error('Error hashing password:', error);
-    throw new Error('Failed to hash password');
+    console.error("Error hashing password:", error);
+    throw new Error("Failed to hash password");
   }
 };
 
@@ -21,8 +21,8 @@ const comparePassword = async (password, hash) => {
     const isMatch = await bcrypt.compare(password, hash);
     return isMatch;
   } catch (error) {
-    console.error('Error comparing password:', error);
-    throw new Error('Failed to compare password');
+    console.error("Error comparing password:", error);
+    throw new Error("Failed to compare password");
   }
 };
 

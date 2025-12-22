@@ -1,8 +1,8 @@
 // Token Service
 // JWT token generation and verification
 
-const jwt = require('jsonwebtoken');
-const jwtConfig = require('../config/jwt');
+const jwt = require("jsonwebtoken");
+const jwtConfig = require("../config/jwt");
 
 const generateToken = (payload) => {
   try {
@@ -12,8 +12,8 @@ const generateToken = (payload) => {
     });
     return token;
   } catch (error) {
-    console.error('Error generating token:', error);
-    throw new Error('Failed to generate token');
+    console.error("Error generating token:", error);
+    throw new Error("Failed to generate token");
   }
 };
 
@@ -22,12 +22,12 @@ const verifyToken = (token) => {
     const decoded = jwt.verify(token, jwtConfig.secret);
     return decoded;
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      throw new Error('Token has expired');
-    } else if (error.name === 'JsonWebTokenError') {
-      throw new Error('Invalid token');
+    if (error.name === "TokenExpiredError") {
+      throw new Error("Token has expired");
+    } else if (error.name === "JsonWebTokenError") {
+      throw new Error("Invalid token");
     } else {
-      throw new Error('Token verification failed');
+      throw new Error("Token verification failed");
     }
   }
 };
@@ -37,7 +37,7 @@ const decodeToken = (token) => {
     const decoded = jwt.decode(token);
     return decoded;
   } catch (error) {
-    console.error('Error decoding token:', error);
+    console.error("Error decoding token:", error);
     return null;
   }
 };

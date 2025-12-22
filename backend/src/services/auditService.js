@@ -1,10 +1,17 @@
 // Audit Service
 // Handles audit logging for all actions
 
-const auditModel = require('../models/auditModel');
-const { generateUUID } = require('../utils/helpers');
+const auditModel = require("../models/auditModel");
+const { generateUUID } = require("../utils/helpers");
 
-const logAction = async ({ tenantId, userId, action, entityType, entityId, ipAddress }) => {
+const logAction = async ({
+  tenantId,
+  userId,
+  action,
+  entityType,
+  entityId,
+  ipAddress,
+}) => {
   try {
     const auditLog = {
       id: generateUUID(),
@@ -17,9 +24,9 @@ const logAction = async ({ tenantId, userId, action, entityType, entityId, ipAdd
     };
 
     await auditModel.create(auditLog);
-    console.log('Audit log created:', action);
+    console.log("Audit log created:", action);
   } catch (error) {
-    console.error('Error creating audit log:', error);
+    console.error("Error creating audit log:", error);
     // Don't throw error - audit logging should not break the main operation
   }
 };
