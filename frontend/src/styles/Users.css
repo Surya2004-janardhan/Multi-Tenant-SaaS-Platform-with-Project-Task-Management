@@ -1,0 +1,37 @@
+/* Users Page Styles */
+.users-page {
+  max-width: 1000px;
+}
+
+.users-table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.users-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table thead {
+  background: #f5f7fa;
+}
+
+.users-table th {
+  text-align: left;
+  padding: 1rem;
+  color: #666;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.users-table td {
+  padding: 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.users-table tbody tr:hover {
+  background: #fafafa;
+}
