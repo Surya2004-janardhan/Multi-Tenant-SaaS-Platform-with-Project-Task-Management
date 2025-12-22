@@ -1,7 +1,7 @@
 // Project Model
 // Database operations for projects table
 
-const db = require('../config/database');
+const db = require("../config/database");
 
 const create = async (project) => {
   const query = `
@@ -14,7 +14,7 @@ const create = async (project) => {
     project.tenant_id,
     project.name,
     project.description || null,
-    project.status || 'active',
+    project.status || "active",
     project.created_by,
   ];
   const result = await db.query(query, values);
@@ -32,7 +32,10 @@ const findById = async (id) => {
   return result.rows[0];
 };
 
-const findByTenant = async (tenantId, { status = null, search = null, page = 1, limit = 20 }) => {
+const findByTenant = async (
+  tenantId,
+  { status = null, search = null, page = 1, limit = 20 }
+) => {
   let query = `
     SELECT p.*,
            u.full_name as creator_name,
@@ -57,17 +60,17 @@ const findByTenant = async (tenantId, { status = null, search = null, page = 1, 
     paramCount++;
   }
 
-  query += ' ORDER BY p.created_at DESC';
+  query += " ORDER BY p.created_at DESC";
   query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
   values.push(limit, (page - 1) * limit);
 
   const result = await db.query(query, values);
 
   // Get total count
-  let countQuery = 'SELECT COUNT(*) FROM projects WHERE tenant_id = $1';
+  let countQuery = "SELECT COUNT(*) FROM projects WHERE tenant_id = $1";
   const countValues = [tenantId];
   if (status) {
-    countQuery += ' AND status = $2';
+    countQuery += " AND status = $2";
     countValues.push(status);
   }
   const countResult = await db.query(countQuery, countValues);
@@ -90,7 +93,7 @@ const update = async (id, updates) => {
   let paramCount = 1;
 
   Object.keys(updates).forEach((key) => {
-    if (updates[key] !== undefined && key !== 'id') {
+    if (updates[key] !== undefined && key !== "id") {
       fields.push(`${key} = $${paramCount}`);
       values.push(updates[key]);
       paramCount++;
@@ -102,7 +105,7 @@ const update = async (id, updates) => {
 
   const query = `
     UPDATE projects
-    SET ${fields.join(', ')}
+    SET ${fields.join(", ")}
     WHERE id = $${paramCount}
     RETURNING *
   `;
@@ -112,13 +115,13 @@ const update = async (id, updates) => {
 };
 
 const deleteById = async (id) => {
-  const query = 'DELETE FROM projects WHERE id = $1 RETURNING id';
+  const query = "DELETE FROM projects WHERE id = $1 RETURNING id";
   const result = await db.query(query, [id]);
   return result.rows[0];
 };
 
 const countByTenant = async (tenantId) => {
-  const query = 'SELECT COUNT(*) FROM projects WHERE tenant_id = $1';
+  const query = "SELECT COUNT(*) FROM projects WHERE tenant_id = $1";
   const result = await db.query(query, [tenantId]);
   return parseInt(result.rows[0].count);
 };

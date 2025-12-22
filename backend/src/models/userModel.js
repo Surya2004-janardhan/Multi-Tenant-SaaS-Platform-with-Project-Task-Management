@@ -1,7 +1,7 @@
 // User Model
 // Database operations for users table
 
-const db = require('../config/database');
+const db = require("../config/database");
 
 const create = async (user) => {
   const query = `
@@ -15,7 +15,7 @@ const create = async (user) => {
     user.email,
     user.password_hash,
     user.full_name,
-    user.role || 'user',
+    user.role || "user",
     user.is_active !== undefined ? user.is_active : true,
   ];
   const result = await db.query(query, values);
@@ -33,7 +33,7 @@ const findById = async (id) => {
 };
 
 const findByIdWithPassword = async (id) => {
-  const query = 'SELECT * FROM users WHERE id = $1';
+  const query = "SELECT * FROM users WHERE id = $1";
   const result = await db.query(query, [id]);
   return result.rows[0];
 };
@@ -56,7 +56,10 @@ const findByEmailWithPassword = async (email, tenantId) => {
   return result.rows[0];
 };
 
-const findByTenant = async (tenantId, { search = null, role = null, page = 1, limit = 50 }) => {
+const findByTenant = async (
+  tenantId,
+  { search = null, role = null, page = 1, limit = 50 }
+) => {
   let query = `
     SELECT id, tenant_id, email, full_name, role, is_active, created_at, updated_at
     FROM users
@@ -77,14 +80,14 @@ const findByTenant = async (tenantId, { search = null, role = null, page = 1, li
     paramCount++;
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += " ORDER BY created_at DESC";
   query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
   values.push(limit, (page - 1) * limit);
 
   const result = await db.query(query, values);
 
   // Get total count
-  let countQuery = 'SELECT COUNT(*) FROM users WHERE tenant_id = $1';
+  let countQuery = "SELECT COUNT(*) FROM users WHERE tenant_id = $1";
   const countValues = [tenantId];
   const countResult = await db.query(countQuery, countValues);
   const total = parseInt(countResult.rows[0].count);
@@ -106,7 +109,7 @@ const update = async (id, updates) => {
   let paramCount = 1;
 
   Object.keys(updates).forEach((key) => {
-    if (updates[key] !== undefined && key !== 'id') {
+    if (updates[key] !== undefined && key !== "id") {
       fields.push(`${key} = $${paramCount}`);
       values.push(updates[key]);
       paramCount++;
@@ -118,7 +121,7 @@ const update = async (id, updates) => {
 
   const query = `
     UPDATE users
-    SET ${fields.join(', ')}
+    SET ${fields.join(", ")}
     WHERE id = $${paramCount}
     RETURNING id, tenant_id, email, full_name, role, is_active, created_at, updated_at
   `;
@@ -128,13 +131,13 @@ const update = async (id, updates) => {
 };
 
 const deleteById = async (id) => {
-  const query = 'DELETE FROM users WHERE id = $1 RETURNING id';
+  const query = "DELETE FROM users WHERE id = $1 RETURNING id";
   const result = await db.query(query, [id]);
   return result.rows[0];
 };
 
 const countByTenant = async (tenantId) => {
-  const query = 'SELECT COUNT(*) FROM users WHERE tenant_id = $1';
+  const query = "SELECT COUNT(*) FROM users WHERE tenant_id = $1";
   const result = await db.query(query, [tenantId]);
   return parseInt(result.rows[0].count);
 };

@@ -1,7 +1,7 @@
 // Tenant Model
 // Database operations for tenants table
 
-const db = require('../config/database');
+const db = require("../config/database");
 
 const create = async (tenant) => {
   const query = `
@@ -13,8 +13,8 @@ const create = async (tenant) => {
     tenant.id,
     tenant.name,
     tenant.subdomain,
-    tenant.status || 'active',
-    tenant.subscription_plan || 'free',
+    tenant.status || "active",
+    tenant.subscription_plan || "free",
     tenant.max_users || 5,
     tenant.max_projects || 3,
   ];
@@ -23,19 +23,24 @@ const create = async (tenant) => {
 };
 
 const findById = async (id) => {
-  const query = 'SELECT * FROM tenants WHERE id = $1';
+  const query = "SELECT * FROM tenants WHERE id = $1";
   const result = await db.query(query, [id]);
   return result.rows[0];
 };
 
 const findBySubdomain = async (subdomain) => {
-  const query = 'SELECT * FROM tenants WHERE subdomain = $1';
+  const query = "SELECT * FROM tenants WHERE subdomain = $1";
   const result = await db.query(query, [subdomain]);
   return result.rows[0];
 };
 
-const findAll = async ({ page = 1, limit = 10, status = null, subscriptionPlan = null }) => {
-  let query = 'SELECT * FROM tenants WHERE 1=1';
+const findAll = async ({
+  page = 1,
+  limit = 10,
+  status = null,
+  subscriptionPlan = null,
+}) => {
+  let query = "SELECT * FROM tenants WHERE 1=1";
   const values = [];
   let paramCount = 1;
 
@@ -51,18 +56,18 @@ const findAll = async ({ page = 1, limit = 10, status = null, subscriptionPlan =
     paramCount++;
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += " ORDER BY created_at DESC";
   query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
   values.push(limit, (page - 1) * limit);
 
   const result = await db.query(query, values);
 
   // Get total count
-  let countQuery = 'SELECT COUNT(*) FROM tenants WHERE 1=1';
+  let countQuery = "SELECT COUNT(*) FROM tenants WHERE 1=1";
   const countValues = [];
   if (status) countValues.push(status);
   if (subscriptionPlan) countValues.push(subscriptionPlan);
-  
+
   const countResult = await db.query(countQuery, countValues);
   const total = parseInt(countResult.rows[0].count);
 
@@ -95,7 +100,7 @@ const update = async (id, updates) => {
 
   const query = `
     UPDATE tenants
-    SET ${fields.join(', ')}
+    SET ${fields.join(", ")}
     WHERE id = $${paramCount}
     RETURNING *
   `;
