@@ -1,7 +1,7 @@
 // Audit Model
 // Database operations for audit_logs table
 
-const db = require('../config/database');
+const db = require("../config/database");
 
 const create = async (auditLog) => {
   const query = `

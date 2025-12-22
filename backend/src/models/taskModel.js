@@ -1,7 +1,7 @@
 // Task Model
 // Database operations for tasks table
 
-const db = require('../config/database');
+const db = require("../config/database");
 
 const create = async (task) => {
   const query = `
@@ -15,8 +15,8 @@ const create = async (task) => {
     task.tenant_id,
     task.title,
     task.description || null,
-    task.status || 'todo',
-    task.priority || 'medium',
+    task.status || "todo",
+    task.priority || "medium",
     task.assigned_to || null,
     task.due_date || null,
   ];
@@ -37,7 +37,17 @@ const findById = async (id) => {
   return result.rows[0];
 };
 
-const findByProject = async (projectId, { status = null, priority = null, assignedTo = null, search = null, page = 1, limit = 50 }) => {
+const findByProject = async (
+  projectId,
+  {
+    status = null,
+    priority = null,
+    assignedTo = null,
+    search = null,
+    page = 1,
+    limit = 50,
+  }
+) => {
   let query = `
     SELECT t.*,
            u.full_name as assigned_user_name,
@@ -73,17 +83,18 @@ const findByProject = async (projectId, { status = null, priority = null, assign
     paramCount++;
   }
 
-  query += ' ORDER BY';
-  query += ' CASE t.priority WHEN \'high\' THEN 1 WHEN \'medium\' THEN 2 WHEN \'low\' THEN 3 END,';
-  query += ' t.due_date ASC NULLS LAST,';
-  query += ' t.created_at DESC';
+  query += " ORDER BY";
+  query +=
+    " CASE t.priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END,";
+  query += " t.due_date ASC NULLS LAST,";
+  query += " t.created_at DESC";
   query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
   values.push(limit, (page - 1) * limit);
 
   const result = await db.query(query, values);
 
   // Get total count
-  let countQuery = 'SELECT COUNT(*) FROM tasks WHERE project_id = $1';
+  let countQuery = "SELECT COUNT(*) FROM tasks WHERE project_id = $1";
   const countValues = [projectId];
   const countResult = await db.query(countQuery, countValues);
   const total = parseInt(countResult.rows[0].count);
@@ -105,7 +116,7 @@ const update = async (id, updates) => {
   let paramCount = 1;
 
   Object.keys(updates).forEach((key) => {
-    if (updates[key] !== undefined && key !== 'id') {
+    if (updates[key] !== undefined && key !== "id") {
       fields.push(`${key} = $${paramCount}`);
       values.push(updates[key]);
       paramCount++;
@@ -117,7 +128,7 @@ const update = async (id, updates) => {
 
   const query = `
     UPDATE tasks
-    SET ${fields.join(', ')}
+    SET ${fields.join(", ")}
     WHERE id = $${paramCount}
     RETURNING *
   `;
@@ -127,7 +138,7 @@ const update = async (id, updates) => {
 };
 
 const deleteById = async (id) => {
-  const query = 'DELETE FROM tasks WHERE id = $1 RETURNING id';
+  const query = "DELETE FROM tasks WHERE id = $1 RETURNING id";
   const result = await db.query(query, [id]);
   return result.rows[0];
 };
