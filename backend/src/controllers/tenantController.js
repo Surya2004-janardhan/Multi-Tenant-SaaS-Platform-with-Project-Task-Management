@@ -1,10 +1,13 @@
 // Tenant Controller
 // Handles: get all tenants, get tenant details, update tenant
 
-const tenantModel = require('../models/tenantModel');
-const { logAction } = require('../services/auditService');
-const { buildSuccessResponse, buildErrorResponse } = require('../utils/helpers');
-const { AUDIT_ACTIONS } = require('../utils/constants');
+const tenantModel = require("../models/tenantModel");
+const { logAction } = require("../services/auditService");
+const {
+  buildSuccessResponse,
+  buildErrorResponse,
+} = require("../utils/helpers");
+const { AUDIT_ACTIONS } = require("../utils/constants");
 
 const getAllTenants = async (req, res, next) => {
   try {
@@ -13,9 +16,7 @@ const getAllTenants = async (req, res, next) => {
 
     const tenants = await tenantModel.findAll(page, limit);
 
-    return res.status(200).json(
-      buildSuccessResponse(tenants)
-    );
+    return res.status(200).json(buildSuccessResponse(tenants));
   } catch (error) {
     next(error);
   }
@@ -27,9 +28,7 @@ const getTenantById = async (req, res, next) => {
 
     const tenant = await tenantModel.findById(id);
     if (!tenant) {
-      return res.status(404).json(
-        buildErrorResponse('Tenant not found')
-      );
+      return res.status(404).json(buildErrorResponse("Tenant not found"));
     }
 
     // Get tenant stats
@@ -58,9 +57,7 @@ const updateTenant = async (req, res, next) => {
 
     const updatedTenant = await tenantModel.update(id, updates);
     if (!updatedTenant) {
-      return res.status(404).json(
-        buildErrorResponse('Tenant not found')
-      );
+      return res.status(404).json(buildErrorResponse("Tenant not found"));
     }
 
     // Log action
@@ -68,14 +65,14 @@ const updateTenant = async (req, res, next) => {
       tenantId: id,
       userId: req.user.userId,
       action: AUDIT_ACTIONS.UPDATE,
-      entityType: 'tenant',
+      entityType: "tenant",
       entityId: id,
       ipAddress: req.ip,
     });
 
-    return res.status(200).json(
-      buildSuccessResponse(updatedTenant, 'Tenant updated successfully')
-    );
+    return res
+      .status(200)
+      .json(buildSuccessResponse(updatedTenant, "Tenant updated successfully"));
   } catch (error) {
     next(error);
   }

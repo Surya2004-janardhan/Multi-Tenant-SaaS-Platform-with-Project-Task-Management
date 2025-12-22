@@ -1,12 +1,15 @@
 // User Controller
 // Handles: add user, list users, get user, update user, delete user
 
-const userModel = require('../models/userModel');
-const { hashPassword } = require('../services/hashService');
-const { checkUserLimit } = require('../services/subscriptionService');
-const { logAction } = require('../services/auditService');
-const { buildSuccessResponse, buildErrorResponse } = require('../utils/helpers');
-const { AUDIT_ACTIONS } = require('../utils/constants');
+const userModel = require("../models/userModel");
+const { hashPassword } = require("../services/hashService");
+const { checkUserLimit } = require("../services/subscriptionService");
+const { logAction } = require("../services/auditService");
+const {
+  buildSuccessResponse,
+  buildErrorResponse,
+} = require("../utils/helpers");
+const { AUDIT_ACTIONS } = require("../utils/constants");
 
 const createUser = async (req, res, next) => {
   try {
@@ -16,17 +19,21 @@ const createUser = async (req, res, next) => {
     // Check subscription limit
     const limitCheck = await checkUserLimit(tenantId);
     if (!limitCheck.allowed) {
-      return res.status(403).json(
-        buildErrorResponse(`User limit reached. Current: ${limitCheck.current}, Limit: ${limitCheck.limit}`)
-      );
+      return res
+        .status(403)
+        .json(
+          buildErrorResponse(
+            `User limit reached. Current: ${limitCheck.current}, Limit: ${limitCheck.limit}`
+          )
+        );
     }
 
     // Check if user already exists
     const existingUser = await userModel.findByEmail(email, tenantId);
     if (existingUser) {
-      return res.status(409).json(
-        buildErrorResponse('User with this email already exists')
-      );
+      return res
+        .status(409)
+        .json(buildErrorResponse("User with this email already exists"));
     }
 
     // Hash password
@@ -38,7 +45,7 @@ const createUser = async (req, res, next) => {
       email,
       password_hash: passwordHash,
       full_name: fullName,
-      role: role || 'user',
+      role: role || "user",
     });
 
     // Log action
@@ -46,18 +53,21 @@ const createUser = async (req, res, next) => {
       tenantId,
       userId: req.user.userId,
       action: AUDIT_ACTIONS.CREATE,
-      entityType: 'user',
+      entityType: "user",
       entityId: user.id,
       ipAddress: req.ip,
     });
 
     return res.status(201).json(
-      buildSuccessResponse({
-        id: user.id,
-        email: user.email,
-        fullName: user.full_name,
-        role: user.role,
-      }, 'User created successfully')
+      buildSuccessResponse(
+        {
+          id: user.id,
+          email: user.email,
+          fullName: user.full_name,
+          role: user.role,
+        },
+        "User created successfully"
+      )
     );
   } catch (error) {
     next(error);
@@ -72,11 +82,15 @@ const getUsersByTenant = async (req, res, next) => {
     const search = req.query.search || null;
     const role = req.query.role || null;
 
-    const users = await userModel.findByTenant(tenantId, page, limit, search, role);
-
-    return res.status(200).json(
-      buildSuccessResponse(users)
+    const users = await userModel.findByTenant(
+      tenantId,
+      page,
+      limit,
+      search,
+      role
     );
+
+    return res.status(200).json(buildSuccessResponse(users));
   } catch (error) {
     next(error);
   }
@@ -97,9 +111,7 @@ const updateUser = async (req, res, next) => {
 
     const updatedUser = await userModel.update(id, tenantId, updates);
     if (!updatedUser) {
-      return res.status(404).json(
-        buildErrorResponse('User not found')
-      );
+      return res.status(404).json(buildErrorResponse("User not found"));
     }
 
     // Log action
@@ -107,18 +119,21 @@ const updateUser = async (req, res, next) => {
       tenantId,
       userId: req.user.userId,
       action: AUDIT_ACTIONS.UPDATE,
-      entityType: 'user',
+      entityType: "user",
       entityId: id,
       ipAddress: req.ip,
     });
 
     return res.status(200).json(
-      buildSuccessResponse({
-        id: updatedUser.id,
-        email: updatedUser.email,
-        fullName: updatedUser.full_name,
-        role: updatedUser.role,
-      }, 'User updated successfully')
+      buildSuccessResponse(
+        {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          fullName: updatedUser.full_name,
+          role: updatedUser.role,
+        },
+        "User updated successfully"
+      )
     );
   } catch (error) {
     next(error);
@@ -132,16 +147,14 @@ const deleteUser = async (req, res, next) => {
 
     // Prevent self-deletion
     if (id === currentUserId) {
-      return res.status(400).json(
-        buildErrorResponse('Cannot delete your own account')
-      );
+      return res
+        .status(400)
+        .json(buildErrorResponse("Cannot delete your own account"));
     }
 
     const deleted = await userModel.deleteById(id, tenantId);
     if (!deleted) {
-      return res.status(404).json(
-        buildErrorResponse('User not found')
-      );
+      return res.status(404).json(buildErrorResponse("User not found"));
     }
 
     // Log action
@@ -149,14 +162,14 @@ const deleteUser = async (req, res, next) => {
       tenantId,
       userId: currentUserId,
       action: AUDIT_ACTIONS.DELETE,
-      entityType: 'user',
+      entityType: "user",
       entityId: id,
       ipAddress: req.ip,
     });
 
-    return res.status(200).json(
-      buildSuccessResponse(null, 'User deleted successfully')
-    );
+    return res
+      .status(200)
+      .json(buildSuccessResponse(null, "User deleted successfully"));
   } catch (error) {
     next(error);
   }
