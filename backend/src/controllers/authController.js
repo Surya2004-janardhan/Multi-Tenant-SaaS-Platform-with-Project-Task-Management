@@ -34,8 +34,7 @@ const registerTenant = async (req, res, next) => {
     const tenant = await tenantModel.create({
       name: tenantName,
       subdomain,
-      status: TENANT_STATUS.ACTIVE,
-      subscription_plan: SUBSCRIPTION_PLANS.FREE,
+      subscription_tier: "free",
     });
 
     // Hash password
@@ -99,12 +98,6 @@ const login = async (req, res, next) => {
     const tenant = await tenantModel.findBySubdomain(tenantSubdomain);
     if (!tenant) {
       return res.status(401).json(buildErrorResponse("Invalid credentials"));
-    }
-
-    if (tenant.status !== TENANT_STATUS.ACTIVE) {
-      return res
-        .status(403)
-        .json(buildErrorResponse("Tenant account is not active"));
     }
 
     // Find user with password

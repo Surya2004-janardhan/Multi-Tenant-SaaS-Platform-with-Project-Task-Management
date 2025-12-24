@@ -5,12 +5,11 @@ const db = require("../config/database");
 
 const create = async (task) => {
   const query = `
-    INSERT INTO tasks (id, project_id, tenant_id, title, description, status, priority, assigned_to, due_date)
+    INSERT INTO tasks (project_id, tenant_id, title, description, status, priority, assigned_to, due_date, created_by)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
   `;
   const values = [
-    task.id,
     task.project_id,
     task.tenant_id,
     task.title,
@@ -19,6 +18,7 @@ const create = async (task) => {
     task.priority || "medium",
     task.assigned_to || null,
     task.due_date || null,
+    task.created_by,
   ];
   const result = await db.query(query, values);
   return result.rows[0];

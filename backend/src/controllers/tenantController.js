@@ -48,12 +48,11 @@ const getTenantById = async (req, res, next) => {
 const updateTenant = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, status, subscription_plan } = req.body;
+    const { name, subscription_tier } = req.body;
 
     const updates = {};
     if (name) updates.name = name;
-    if (status) updates.status = status;
-    if (subscription_plan) updates.subscription_plan = subscription_plan;
+    if (subscription_tier) updates.subscription_tier = subscription_tier;
 
     const updatedTenant = await tenantModel.update(id, updates);
     if (!updatedTenant) {

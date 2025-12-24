@@ -5,12 +5,11 @@ const db = require("../config/database");
 
 const create = async (project) => {
   const query = `
-    INSERT INTO projects (id, tenant_id, name, description, status, created_by)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO projects (tenant_id, name, description, status, created_by)
+    VALUES ($1, $2, $3, $4, $5)
     RETURNING *
   `;
   const values = [
-    project.id,
     project.tenant_id,
     project.name,
     project.description || null,

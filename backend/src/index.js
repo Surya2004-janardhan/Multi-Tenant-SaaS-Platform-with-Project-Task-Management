@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const routes = require("./routes");
 const corsOptions = require("./config/cors");
+const requestLogger = require("./middleware/requestLogger");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -16,13 +17,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging in development
-if (process.env.NODE_ENV === "development") {
-  app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
-  });
-}
+// API Request Logger - logs all API calls
+app.use("/api", requestLogger);
 
 // API Routes
 app.use("/api", routes);

@@ -5,18 +5,16 @@ const db = require("../config/database");
 
 const create = async (user) => {
   const query = `
-    INSERT INTO users (id, tenant_id, email, password_hash, full_name, role, is_active)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-    RETURNING id, tenant_id, email, full_name, role, is_active, created_at, updated_at
+    INSERT INTO users (tenant_id, email, password_hash, full_name, role)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id, tenant_id, email, full_name, role, created_at, updated_at
   `;
   const values = [
-    user.id,
     user.tenant_id,
     user.email,
     user.password_hash,
     user.full_name,
     user.role || "user",
-    user.is_active !== undefined ? user.is_active : true,
   ];
   const result = await db.query(query, values);
   return result.rows[0];
@@ -24,7 +22,7 @@ const create = async (user) => {
 
 const findById = async (id) => {
   const query = `
-    SELECT id, tenant_id, email, full_name, role, is_active, created_at, updated_at
+    SELECT id, tenant_id, email, full_name, role, created_at, updated_at
     FROM users
     WHERE id = $1
   `;
@@ -61,7 +59,7 @@ const findByTenant = async (
   { search = null, role = null, page = 1, limit = 50 }
 ) => {
   let query = `
-    SELECT id, tenant_id, email, full_name, role, is_active, created_at, updated_at
+    SELECT id, tenant_id, email, full_name, role, created_at, updated_at
     FROM users
     WHERE tenant_id = $1
   `;
@@ -123,7 +121,7 @@ const update = async (id, updates) => {
     UPDATE users
     SET ${fields.join(", ")}
     WHERE id = $${paramCount}
-    RETURNING id, tenant_id, email, full_name, role, is_active, created_at, updated_at
+    RETURNING id, tenant_id, email, full_name, role, created_at, updated_at
   `;
 
   const result = await db.query(query, values);
