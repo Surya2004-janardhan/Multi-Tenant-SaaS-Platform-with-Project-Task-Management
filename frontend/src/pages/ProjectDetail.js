@@ -29,7 +29,7 @@ const ProjectDetail = () => {
         taskService.getByProject(id, 1, 50),
       ]);
       setProject(projectRes.data);
-      setTasks(tasksRes.data.data || []);
+      setTasks(tasksRes.data.tasks || []);
     } catch (err) {
       console.error("Failed to load project:", err);
     } finally {

@@ -19,16 +19,16 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       const projectsRes = await projectService.getAll(1, 5);
-      setProjects(projectsRes.data.data || []);
+      setProjects(projectsRes.data.projects || []);
       setStats((prev) => ({ ...prev, projects: projectsRes.data.total || 0 }));
 
-      if (projectsRes.data.data?.length > 0) {
+      if (projectsRes.data.projects?.length > 0) {
         const tasksRes = await taskService.getByProject(
-          projectsRes.data.data[0].id,
+          projectsRes.data.projects[0].id,
           1,
           5
         );
-        setRecentTasks(tasksRes.data.data || []);
+        setRecentTasks(tasksRes.data.tasks || []);
         setStats((prev) => ({ ...prev, tasks: tasksRes.data.total || 0 }));
       }
     } catch (error) {

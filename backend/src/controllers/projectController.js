@@ -61,12 +61,11 @@ const getProjectsByTenant = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const status = req.query.status || null;
 
-    const projects = await projectModel.findByTenant(
-      tenantId,
+    const projects = await projectModel.findByTenant(tenantId, {
       page,
       limit,
-      status
-    );
+      status,
+    });
 
     return res.status(200).json(buildSuccessResponse(projects));
   } catch (error) {

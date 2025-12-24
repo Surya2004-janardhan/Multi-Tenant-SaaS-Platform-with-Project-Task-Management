@@ -20,7 +20,7 @@ const Users = () => {
   const loadUsers = async () => {
     try {
       const response = await userService.getAll(1, 50);
-      setUsers(response.data.data || []);
+      setUsers(response.data.users || []);
     } catch (err) {
       console.error("Failed to load users:", err);
     } finally {

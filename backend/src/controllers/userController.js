@@ -82,13 +82,12 @@ const getUsersByTenant = async (req, res, next) => {
     const search = req.query.search || null;
     const role = req.query.role || null;
 
-    const users = await userModel.findByTenant(
-      tenantId,
+    const users = await userModel.findByTenant(tenantId, {
       page,
       limit,
       search,
-      role
-    );
+      role,
+    });
 
     return res.status(200).json(buildSuccessResponse(users));
   } catch (error) {

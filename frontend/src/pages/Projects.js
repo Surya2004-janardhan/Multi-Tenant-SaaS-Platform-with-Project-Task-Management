@@ -17,7 +17,7 @@ const Projects = () => {
   const loadProjects = async () => {
     try {
       const response = await projectService.getAll(1, 50);
-      setProjects(response.data.data || []);
+      setProjects(response.data.projects || []);
     } catch (err) {
       setError("Failed to load projects");
     } finally {
