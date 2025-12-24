@@ -18,12 +18,7 @@ router.post(
 );
 
 // GET /api/tasks - Get all tasks (with optional filters)
-router.get(
-  "/",
-  authenticate,
-  tenantContext,
-  taskController.getAllTasks
-);
+router.get("/", authenticate, tenantContext, taskController.getAllTasks);
 
 // GET /api/tasks/project/:projectId - Get all tasks for a project
 router.get(

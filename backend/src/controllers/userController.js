@@ -95,6 +95,30 @@ const getUsersByTenant = async (req, res, next) => {
   }
 };
 
+const getUserById = async (req, res, next) => {
+  try {
+    const { tenantId } = req.user;
+    const { id } = req.params;
+
+    const user = await userModel.findById(id, tenantId);
+    if (!user) {
+      return res.status(404).json(buildErrorResponse("User not found"));
+    }
+
+    return res.status(200).json(
+      buildSuccessResponse({
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name,
+        role: user.role,
+        createdAt: user.created_at,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateUser = async (req, res, next) => {
   try {
     const { tenantId } = req.user;
@@ -177,6 +201,7 @@ const deleteUser = async (req, res, next) => {
 module.exports = {
   createUser,
   getUsersByTenant,
+  getUserById,
   updateUser,
   deleteUser,
 };
