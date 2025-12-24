@@ -5,14 +5,14 @@ const db = require("../config/database");
 
 const create = async (tenant) => {
   const query = `
-    INSERT INTO tenants (name, subdomain, subscription_tier, max_users, max_projects)
+    INSERT INTO tenants (name, subdomain, subscription_plan, max_users, max_projects)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *
   `;
   const values = [
     tenant.name,
     tenant.subdomain,
-    tenant.subscription_tier || "free",
+    tenant.subscription_plan || "free",
     tenant.max_users || 5,
     tenant.max_projects || 3,
   ];
@@ -32,14 +32,14 @@ const findBySubdomain = async (subdomain) => {
   return result.rows[0];
 };
 
-const findAll = async ({ page = 1, limit = 10, subscriptionTier = null }) => {
+const findAll = async ({ page = 1, limit = 10, subscriptionPlan = null }) => {
   let query = "SELECT * FROM tenants WHERE 1=1";
   const values = [];
   let paramCount = 1;
 
-  if (subscriptionTier) {
-    query += ` AND subscription_tier = $${paramCount}`;
-    values.push(subscriptionTier);
+  if (subscriptionPlan) {
+    query += ` AND subscription_plan = $${paramCount}`;
+    values.push(subscriptionPlan);
     paramCount++;
   }
 
@@ -52,7 +52,7 @@ const findAll = async ({ page = 1, limit = 10, subscriptionTier = null }) => {
   // Get total count
   let countQuery = "SELECT COUNT(*) FROM tenants WHERE 1=1";
   const countValues = [];
-  if (subscriptionTier) countValues.push(subscriptionTier);
+  if (subscriptionPlan) countValues.push(subscriptionPlan);
 
   const countResult = await db.query(countQuery, countValues);
   const total = parseInt(countResult.rows[0].count);

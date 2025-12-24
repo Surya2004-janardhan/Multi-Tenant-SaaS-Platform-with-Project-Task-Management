@@ -5,9 +5,10 @@ CREATE TABLE IF NOT EXISTS tenants (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   subdomain VARCHAR(63) UNIQUE NOT NULL,
-  subscription_tier VARCHAR(20) DEFAULT 'free' CHECK (subscription_tier IN ('free', 'pro', 'enterprise')),
-  max_projects INTEGER DEFAULT 5,
-  max_users INTEGER DEFAULT 3,
+  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'trial')),
+  subscription_plan VARCHAR(20) DEFAULT 'free' CHECK (subscription_plan IN ('free', 'pro', 'enterprise')),
+  max_projects INTEGER DEFAULT 3,
+  max_users INTEGER DEFAULT 5,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

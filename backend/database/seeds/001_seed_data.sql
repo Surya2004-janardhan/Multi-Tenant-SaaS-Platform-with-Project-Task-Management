@@ -4,18 +4,19 @@
 -- Bcrypt hash (10 rounds): $2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u
 
 -- Insert Demo Tenants (MATCHES submission.json)
-INSERT INTO tenants (name, subdomain, subscription_tier, max_projects, max_users)
+INSERT INTO tenants (name, subdomain, status, subscription_plan, max_projects, max_users)
 VALUES 
-('TechCorp Solutions', 'techcorp', 'pro', 25, 15),
-('DesignHub Studio', 'designhub', 'free', 10, 5),
-('AcmeCorp', 'acmecorp', 'free', 10, 5);
+('TechCorp Solutions', 'techcorp', 'active', 'pro', 15, 25),
+('DesignHub Studio', 'designhub', 'active', 'free', 3, 5),
+('AcmeCorp', 'acmecorp', 'active', 'free', 3, 5);
 
 -- Insert Super Admin User (system-wide access)
 -- Email: superadmin@system.com, Password: Admin@123
 -- Bcrypt hash for Admin@123: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+-- IMPORTANT: tenant_id MUST BE NULL for super_admin
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
 VALUES 
-(1, 'superadmin@system.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Super Admin', 'tenant_admin');
+(NULL, 'superadmin@system.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Super Admin', 'super_admin');
 
 -- Insert Tenant Users (MATCHES submission.json exactly)
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
@@ -56,22 +57,22 @@ VALUES
 (1, 1, 'User testing', 'Conduct usability testing', 'todo', 'medium', 3, '2025-02-01', 2),
 
 -- TechCorp - Mobile App (Project ID: 2)
-(1, 2, 'Setup React Native project', 'Initialize mobile app project', 'done', 'high', 3, '2024-12-20', 2),
+(1, 2, 'Setup React Native project', 'Initialize mobile app project', 'completed', 'high', 3, '2024-12-20', 2),
 (1, 2, 'Build authentication screen', 'Login and signup UI', 'in_progress', 'high', 4, '2025-01-10', 2),
 (1, 2, 'API integration', 'Connect to backend APIs', 'todo', 'medium', 3, '2025-01-25', 2),
 
 -- DesignHub - Brand Identity (Project ID: 3)
-(2, 3, 'Define color palette', 'Primary and secondary brand colors', 'done', 'high', 6, '2024-12-15', 5),
+(2, 3, 'Define color palette', 'Primary and secondary brand colors', 'completed', 'high', 6, '2024-12-15', 5),
 (2, 3, 'Typography guidelines', 'Font selections and usage', 'in_progress', 'high', 6, '2025-01-05', 5),
 (2, 3, 'Logo design', 'Create brand logo variations', 'todo', 'medium', 6, '2025-01-12', 5),
 
 -- AcmeCorp - Website Redesign (Project ID: 4)
-(3, 4, 'Requirements gathering', 'Collect client requirements', 'done', 'high', 8, '2024-12-18', 7),
+(3, 4, 'Requirements gathering', 'Collect client requirements', 'completed', 'high', 8, '2024-12-18', 7),
 (3, 4, 'Wireframe design', 'Create initial wireframes', 'in_progress', 'high', 8, '2025-01-08', 7),
 (3, 4, 'Frontend development', 'Build website frontend', 'todo', 'high', 8, '2025-01-30', 7),
 
 -- AcmeCorp - Mobile App Development (Project ID: 5)
-(3, 5, 'Technology selection', 'Choose mobile tech stack', 'done', 'high', 8, '2024-12-20', 7),
+(3, 5, 'Technology selection', 'Choose mobile tech stack', 'completed', 'high', 8, '2024-12-20', 7),
 (3, 5, 'UI/UX design', 'Design app user interface', 'in_progress', 'high', 8, '2025-01-12', 7),
 (3, 5, 'Backend API development', 'Build REST APIs', 'todo', 'medium', 8, '2025-02-01', 7);
 

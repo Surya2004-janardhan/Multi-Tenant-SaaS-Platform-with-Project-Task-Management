@@ -34,7 +34,7 @@ const registerTenant = async (req, res, next) => {
     const tenant = await tenantModel.create({
       name: tenantName,
       subdomain,
-      subscription_tier: "free",
+      subscription_plan: "free",
     });
 
     // Hash password
