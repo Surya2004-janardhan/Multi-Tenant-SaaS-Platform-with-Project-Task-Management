@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "migrate": "node migrations/run-migrations.js",
-    "seed": "node seeds/run-seeds.js",
+    "migrate": "node database/run-migrations.js",
+    "seed": "node database/run-seeds.js",
     "test": "jest --coverage"
   },
   "keywords": [
