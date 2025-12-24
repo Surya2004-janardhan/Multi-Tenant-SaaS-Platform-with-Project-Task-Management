@@ -89,6 +89,42 @@ const getTasksByProject = async (req, res, next) => {
   }
 };
 
+const getAllTasks = async (req, res, next) => {
+  try {
+    const { tenantId } = req.user;
+    const projectId = req.query.project_id || null;
+    const status = req.query.status || null;
+    const priority = req.query.priority || null;
+    const assignedTo = req.query.assignedTo || null;
+
+    // If project_id is provided, filter by project
+    if (projectId) {
+      const tasks = await taskModel.findByProject(
+        projectId,
+        tenantId,
+        1,
+        100,
+        status,
+        priority,
+        assignedTo
+      );
+      return res.status(200).json(buildSuccessResponse(tasks));
+    }
+
+    // Otherwise get all tasks for tenant
+    const tasks = await taskModel.findByTenant(
+      tenantId,
+      status,
+      priority,
+      assignedTo
+    );
+
+    return res.status(200).json(buildSuccessResponse(tasks));
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getTaskById = async (req, res, next) => {
   try {
     const { tenantId } = req.user;
@@ -208,6 +244,7 @@ const deleteTask = async (req, res, next) => {
 
 module.exports = {
   createTask,
+  getAllTasks,
   getTasksByProject,
   getTaskById,
   updateTask,

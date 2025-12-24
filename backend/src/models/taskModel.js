@@ -143,10 +143,58 @@ const deleteById = async (id) => {
   return result.rows[0];
 };
 
+const findByTenant = async (
+  tenantId,
+  status = null,
+  priority = null,
+  assignedTo = null
+) => {
+  let query = `
+    SELECT t.*,
+           p.name as project_name,
+           u.full_name as assigned_user_name,
+           u.email as assigned_user_email
+    FROM tasks t
+    JOIN projects p ON t.project_id = p.id
+    LEFT JOIN users u ON t.assigned_to = u.id
+    WHERE t.tenant_id = $1
+  `;
+  const values = [tenantId];
+  let paramCount = 2;
+
+  if (status) {
+    query += ` AND t.status = $${paramCount}`;
+    values.push(status);
+    paramCount++;
+  }
+
+  if (priority) {
+    query += ` AND t.priority = $${paramCount}`;
+    values.push(priority);
+    paramCount++;
+  }
+
+  if (assignedTo) {
+    query += ` AND t.assigned_to = $${paramCount}`;
+    values.push(assignedTo);
+    paramCount++;
+  }
+
+  query += " ORDER BY";
+  query +=
+    " CASE t.priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END,";
+  query += " t.due_date ASC NULLS LAST,";
+  query += " t.created_at DESC";
+
+  const result = await db.query(query, values);
+  return result.rows;
+};
+
 module.exports = {
   create,
   findById,
   findByProject,
+  findByTenant,
   update,
   deleteById,
 };

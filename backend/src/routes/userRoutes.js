@@ -22,6 +22,9 @@ router.post(
 // GET /api/users - Get all users in tenant
 router.get("/", authenticate, tenantContext, userController.getUsersByTenant);
 
+// GET /api/users/:id - Get user by ID
+router.get("/:id", authenticate, tenantContext, userController.getUserById);
+
 // PUT /api/users/:id - Update user (tenant admin only)
 router.put(
   "/:id",
