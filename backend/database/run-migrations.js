@@ -1,17 +1,17 @@
 // Database Migration Runner
 // Runs all migration files in order
 
-require("dotenv").config({ path: "../.env" });
 const fs = require("fs");
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 const { Pool } = require("pg");
 
 const pool = new Pool({
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
+  port: parseInt(process.env.DB_PORT),
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  password: String(process.env.DB_PASSWORD),
 });
 
 const runMigrations = async () => {
