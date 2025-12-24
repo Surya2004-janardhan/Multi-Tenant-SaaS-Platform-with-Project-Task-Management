@@ -1,0 +1,104 @@
+{
+  "testCredentials": {
+    "superAdmin": {
+      "email": "superadmin@system.com",
+      "password": "Admin@123",
+      "role": "super_admin",
+      "tenantId": null
+    },
+    "tenants": [
+      {
+        "name": "TechCorp Solutions",
+        "subdomain": "techcorp",
+        "status": "active",
+        "subscriptionPlan": "pro",
+        "admin": {
+          "email": "admin@techcorp.com",
+          "password": "password123",
+          "fullName": "Tech Admin",
+          "role": "tenant_admin"
+        },
+        "users": [
+          {
+            "email": "john@techcorp.com",
+            "password": "password123",
+            "fullName": "John Developer",
+            "role": "user"
+          },
+          {
+            "email": "sarah@techcorp.com",
+            "password": "password123",
+            "fullName": "Sarah Designer",
+            "role": "user"
+          }
+        ],
+        "projects": [
+          {
+            "name": "Website Redesign",
+            "description": "Complete website redesign project"
+          },
+          {
+            "name": "Mobile App",
+            "description": "iOS and Android mobile application"
+          }
+        ]
+      },
+      {
+        "name": "DesignHub Studio",
+        "subdomain": "designhub",
+        "status": "active",
+        "subscriptionPlan": "free",
+        "admin": {
+          "email": "admin@designhub.com",
+          "password": "password123",
+          "fullName": "Design Admin",
+          "role": "tenant_admin"
+        },
+        "users": [
+          {
+            "email": "mike@designhub.com",
+            "password": "password123",
+            "fullName": "Mike Designer",
+            "role": "user"
+          }
+        ],
+        "projects": [
+          {
+            "name": "Brand Identity",
+            "description": "New brand identity design"
+          }
+        ]
+      },
+      {
+        "name": "AcmeCorp",
+        "subdomain": "acmecorp",
+        "status": "active",
+        "subscriptionPlan": "free",
+        "admin": {
+          "email": "admin@acmecorp.com",
+          "password": "password123",
+          "fullName": "Acme Admin",
+          "role": "tenant_admin"
+        },
+        "users": [
+          {
+            "email": "developer@acmecorp.com",
+            "password": "password123",
+            "fullName": "John Developer",
+            "role": "user"
+          }
+        ],
+        "projects": [
+          {
+            "name": "Updated Website Redesign",
+            "description": "Redesign with new branding"
+          },
+          {
+            "name": "Mobile App Development",
+            "description": "Mobile application project"
+          }
+        ]
+      }
+    ]
+  }
+}
