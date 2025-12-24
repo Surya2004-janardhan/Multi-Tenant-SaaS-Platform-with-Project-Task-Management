@@ -17,7 +17,7 @@ const createProject = async (req, res, next) => {
 
     // Check subscription limit
     const limitCheck = await checkProjectLimit(tenantId);
-    if (!limitCheck.allowed) {
+    if (!limitCheck.canAdd) {
       return res
         .status(403)
         .json(
@@ -101,7 +101,7 @@ const updateProject = async (req, res, next) => {
     if (description !== undefined) updates.description = description;
     if (status) updates.status = status;
 
-    const updatedProject = await projectModel.update(id, tenantId, updates);
+    const updatedProject = await projectModel.update(id, updates);
     if (!updatedProject) {
       return res.status(404).json(buildErrorResponse("Project not found"));
     }

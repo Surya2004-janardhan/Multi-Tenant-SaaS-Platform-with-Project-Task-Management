@@ -18,7 +18,7 @@ const createUser = async (req, res, next) => {
 
     // Check subscription limit
     const limitCheck = await checkUserLimit(tenantId);
-    if (!limitCheck.allowed) {
+    if (!limitCheck.canAdd) {
       return res
         .status(403)
         .json(

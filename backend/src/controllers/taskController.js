@@ -36,6 +36,7 @@ const createTask = async (req, res, next) => {
       status: TASK_STATUS.TODO,
       due_date: dueDate || null,
       assigned_to: assignedTo || null,
+      created_by: userId,
     });
 
     // Log action
@@ -152,7 +153,7 @@ const updateTaskStatus = async (req, res, next) => {
       return res.status(400).json(buildErrorResponse("Status is required"));
     }
 
-    const updatedTask = await taskModel.update(id, tenantId, { status });
+    const updatedTask = await taskModel.update(id, { status });
     if (!updatedTask) {
       return res.status(404).json(buildErrorResponse("Task not found"));
     }
