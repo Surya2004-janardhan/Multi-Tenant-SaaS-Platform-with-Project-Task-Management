@@ -1,11 +1,7 @@
 // API Configuration and Axios Instance
 import axios from "axios";
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  (window.location.hostname === "localhost"
-    ? "http://localhost:5000/api"
-    : "https://multi-tenant-saas-platform-with-project.onrender.com/api");
+const API_BASE_URL ="https://multi-tenant-saas-platform-with-project.onrender.com/api");
 
 // Create axios instance with defaults
 const apiClient = axios.create({
