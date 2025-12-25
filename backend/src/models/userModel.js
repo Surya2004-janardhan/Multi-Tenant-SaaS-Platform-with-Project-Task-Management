@@ -46,11 +46,26 @@ const findByEmail = async (email, tenantId) => {
 };
 
 const findByEmailWithPassword = async (email, tenantId) => {
-  const query = `
-    SELECT * FROM users
-    WHERE email = $1 AND tenant_id = $2
-  `;
-  const result = await db.query(query, [email, tenantId]);
+  let query;
+  let values;
+
+  if (tenantId === null) {
+    // For super admin (tenant_id IS NULL)
+    query = `
+      SELECT * FROM users
+      WHERE email = $1 AND tenant_id IS NULL
+    `;
+    values = [email];
+  } else {
+    // For regular tenant users
+    query = `
+      SELECT * FROM users
+      WHERE email = $1 AND tenant_id = $2
+    `;
+    values = [email, tenantId];
+  }
+
+  const result = await db.query(query, values);
   return result.rows[0];
 };
 

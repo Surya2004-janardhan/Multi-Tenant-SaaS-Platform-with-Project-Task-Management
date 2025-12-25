@@ -189,7 +189,19 @@ const updateTaskStatus = async (req, res, next) => {
       return res.status(400).json(buildErrorResponse("Status is required"));
     }
 
-    const updatedTask = await taskModel.update(id, { status });
+    // Validate status enum
+    const validStatuses = ["todo", "in_progress", "completed"];
+    if (!validStatuses.includes(status)) {
+      return res
+        .status(400)
+        .json(
+          buildErrorResponse(
+            "Invalid status value. Must be one of: todo, in_progress, completed"
+          )
+        );
+    }
+
+    const updatedTask = await taskModel.update(id, tenantId, { status });
     if (!updatedTask) {
       return res.status(404).json(buildErrorResponse("Task not found"));
     }

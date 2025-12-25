@@ -1,10 +1,13 @@
-// Database Seed Runner
+// Database Seed Runner with Retry Mechanism
 // Runs seed data SQL file
 
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 const { Pool } = require("pg");
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
 
 // Support both DATABASE_URL and individual DB_* variables
 const pool = process.env.DATABASE_URL
@@ -13,6 +16,8 @@ const pool = process.env.DATABASE_URL
       ssl: {
         rejectUnauthorized: false,
       },
+      connectionTimeoutMillis: 10000,
+      keepAlive: true,
     })
   : new Pool({
       host: process.env.DB_HOST,
@@ -20,7 +25,32 @@ const pool = process.env.DATABASE_URL
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
       password: String(process.env.DB_PASSWORD),
+      connectionTimeoutMillis: 10000,
+      keepAlive: true,
     });
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const queryWithRetry = async (sql, maxRetries = MAX_RETRIES) => {
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔄 Attempt ${attempt}/${maxRetries}`);
+      const result = await pool.query(sql);
+      return result;
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries) {
+        console.warn(`⚠️ Attempt ${attempt} failed: ${error.message}`);
+        console.log(`⏳ Retrying in ${RETRY_DELAY_MS}ms...`);
+        await delay(RETRY_DELAY_MS * attempt);
+      }
+    }
+  }
+
+  throw lastError;
+};
 
 const runSeeds = async () => {
   try {
@@ -39,7 +69,7 @@ const runSeeds = async () => {
       const filePath = path.join(seedsPath, file);
       const sql = fs.readFileSync(filePath, "utf8");
 
-      await pool.query(sql);
+      await queryWithRetry(sql);
       console.log(`✅ Completed: ${file}\n`);
     }
 

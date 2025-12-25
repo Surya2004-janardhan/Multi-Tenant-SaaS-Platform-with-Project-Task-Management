@@ -4,7 +4,7 @@
   "description": "Backend API for Multi-Tenant SaaS Platform with Project and Task Management",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "nodemon src/index.js",
     "dev": "nodemon src/index.js",
     "migrate": "node database/run-migrations.js",
     "seed": "node database/run-seeds.js",

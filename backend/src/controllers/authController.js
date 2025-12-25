@@ -97,11 +97,21 @@ const login = async (req, res, next) => {
     // Find tenant
     const tenant = await tenantModel.findBySubdomain(tenantSubdomain);
     if (!tenant) {
-      return res.status(401).json(buildErrorResponse("Invalid credentials"));
+      return res.status(404).json(buildErrorResponse("Tenant not found"));
     }
 
     // Find user with password
-    const user = await userModel.findByEmailWithPassword(email, tenant.id);
+    // Super admin can login with any tenant subdomain
+    let user = await userModel.findByEmailWithPassword(email, tenant.id);
+
+    // If not found in tenant, check if it's a super admin
+    if (!user) {
+      const superAdmin = await userModel.findByEmailWithPassword(email, null);
+      if (superAdmin && superAdmin.role === "super_admin") {
+        user = superAdmin;
+      }
+    }
+
     if (!user) {
       return res.status(401).json(buildErrorResponse("Invalid credentials"));
     }
@@ -111,6 +121,10 @@ const login = async (req, res, next) => {
     if (!isPasswordValid) {
       return res.status(401).json(buildErrorResponse("Invalid credentials"));
     }
+
+    // For super admin, use their actual tenant_id (null), not the login tenant
+    const tokenTenantId =
+      user.role === "super_admin" ? user.tenant_id : tenant.id;
 
     // Log action
     await logAction({
@@ -125,7 +139,7 @@ const login = async (req, res, next) => {
     // Generate token
     const token = generateToken({
       userId: user.id,
-      tenantId: tenant.id,
+      tenantId: tokenTenantId,
       role: user.role,
     });
 
