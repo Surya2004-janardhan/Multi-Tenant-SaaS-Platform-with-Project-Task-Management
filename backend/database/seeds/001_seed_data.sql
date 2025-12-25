@@ -4,11 +4,13 @@
 -- Bcrypt hash (10 rounds): $2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u
 
 -- Insert Demo Tenants (MATCHES submission.json)
+-- Using ON CONFLICT DO NOTHING to make idempotent
 INSERT INTO tenants (name, subdomain, status, subscription_plan, max_projects, max_users)
 VALUES 
 ('TechCorp Solutions', 'techcorp', 'active', 'pro', 15, 25),
 ('DesignHub Studio', 'designhub', 'active', 'free', 3, 5),
-('AcmeCorp', 'acmecorp', 'active', 'free', 3, 5);
+('AcmeCorp', 'acmecorp', 'active', 'free', 3, 5)
+ON CONFLICT (subdomain) DO NOTHING;
 
 -- Insert Super Admin User (system-wide access)
 -- Email: superadmin@system.com, Password: Admin@123
@@ -16,7 +18,8 @@ VALUES
 -- IMPORTANT: tenant_id MUST BE NULL for super_admin
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
 VALUES 
-(NULL, 'superadmin@system.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Super Admin', 'super_admin');
+(NULL, 'superadmin@system.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Super Admin', 'super_admin')
+ON CONFLICT (tenant_id, email) DO NOTHING;
 
 -- Insert Tenant Users (MATCHES submission.json exactly)
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
@@ -32,7 +35,8 @@ VALUES
 
 -- AcmeCorp Users (tenant_id: 3) - ADDED TO MATCH submission.json
 (3, 'admin@acmecorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'Acme Admin', 'tenant_admin'),
-(3, 'developer@acmecorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'John Developer', 'user');
+(3, 'developer@acmecorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'John Developer', 'user')
+ON CONFLICT (tenant_id, email) DO NOTHING;
 
 -- Insert Projects (MATCHES submission.json)
 INSERT INTO projects (tenant_id, name, description, status, created_by)
