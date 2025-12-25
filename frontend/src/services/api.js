@@ -4,6 +4,8 @@ import axios from "axios";
 const API_BASE_URL =
   "https://multi-tenant-saas-platform-with-project.onrender.com/api";
 
+console.log("🌐 API_BASE_URL:", API_BASE_URL);
+
 // Create axios instance with defaults
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

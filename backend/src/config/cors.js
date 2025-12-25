@@ -7,6 +7,7 @@ require("dotenv").config();
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5000",
+  "https://task3-omega-neon.vercel.app",
   "https://multi-tenant-saas-platform-with-project.onrender.com",
   "https://task3-bt0eo5i4d-suryas-projects-ab9ff4b8.vercel.app",
   // https://task3-bt0eo5i4d-suryas-projects-ab9ff4b8.vercel.app/register
