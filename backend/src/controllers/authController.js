@@ -151,7 +151,7 @@ const login = async (req, res, next) => {
             email: user.email,
             fullName: user.full_name,
             role: user.role,
-            tenantId: tenant.id,
+            tenantId: tokenTenantId, // Use tokenTenantId (null for super_admin)
           },
           token,
         },

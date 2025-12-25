@@ -155,6 +155,71 @@ const countByTenant = async (tenantId) => {
   return parseInt(result.rows[0].count);
 };
 
+const findAll = async ({
+  search = null,
+  role = null,
+  page = 1,
+  limit = 50,
+}) => {
+  let query = `
+    SELECT u.id, u.tenant_id, u.email, u.full_name, u.role, u.created_at, u.updated_at,
+           t.name as tenant_name,
+           t.subdomain as tenant_subdomain
+    FROM users u
+    LEFT JOIN tenants t ON u.tenant_id = t.id
+    WHERE u.tenant_id IS NOT NULL
+  `;
+  const values = [];
+  let paramCount = 1;
+
+  if (search) {
+    query += ` AND (u.full_name ILIKE $${paramCount} OR u.email ILIKE $${paramCount})`;
+    values.push(`%${search}%`);
+    paramCount++;
+  }
+
+  if (role) {
+    query += ` AND u.role = $${paramCount}`;
+    values.push(role);
+    paramCount++;
+  }
+
+  query += " ORDER BY u.created_at DESC";
+  query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+  values.push(limit, (page - 1) * limit);
+
+  const result = await db.query(query, values);
+
+  // Get total count
+  let countQuery = "SELECT COUNT(*) FROM users WHERE tenant_id IS NOT NULL";
+  const countValues = [];
+  let countParamCount = 1;
+
+  if (search) {
+    countQuery += ` AND (full_name ILIKE $${countParamCount} OR email ILIKE $${countParamCount})`;
+    countValues.push(`%${search}%`);
+    countParamCount++;
+  }
+
+  if (role) {
+    countQuery += ` AND role = $${countParamCount}`;
+    countValues.push(role);
+  }
+
+  const countResult = await db.query(countQuery, countValues);
+  const total = parseInt(countResult.rows[0].count);
+
+  return {
+    users: result.rows,
+    total,
+    pagination: {
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      limit,
+    },
+  };
+};
+
 module.exports = {
   create,
   findById,
@@ -162,6 +227,7 @@ module.exports = {
   findByEmail,
   findByEmailWithPassword,
   findByTenant,
+  findAll,
   update,
   deleteById,
   countByTenant,

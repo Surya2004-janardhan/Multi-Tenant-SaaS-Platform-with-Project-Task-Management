@@ -4,7 +4,9 @@
       "email": "superadmin@system.com",
       "password": "Admin@123",
       "role": "super_admin",
-      "tenantId": null
+      "tenantId": null,
+      "subdomain": "system",
+      "note": "Super admin can login with 'system' subdomain or any other tenant subdomain"
     },
     "tenants": [
       {

@@ -125,10 +125,80 @@ const countByTenant = async (tenantId) => {
   return parseInt(result.rows[0].count);
 };
 
+const findAll = async ({
+  status = null,
+  search = null,
+  page = 1,
+  limit = 20,
+}) => {
+  let query = `
+    SELECT p.*,
+           t.name as tenant_name,
+           t.subdomain as tenant_subdomain,
+           u.full_name as creator_name,
+           (SELECT COUNT(*) FROM tasks WHERE project_id = p.id) as task_count,
+           (SELECT COUNT(*) FROM tasks WHERE project_id = p.id AND status = 'completed') as completed_task_count
+    FROM projects p
+    LEFT JOIN users u ON p.created_by = u.id
+    LEFT JOIN tenants t ON p.tenant_id = t.id
+    WHERE 1=1
+  `;
+  const values = [];
+  let paramCount = 1;
+
+  if (status) {
+    query += ` AND p.status = $${paramCount}`;
+    values.push(status);
+    paramCount++;
+  }
+
+  if (search) {
+    query += ` AND p.name ILIKE $${paramCount}`;
+    values.push(`%${search}%`);
+    paramCount++;
+  }
+
+  query += " ORDER BY p.created_at DESC";
+  query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+  values.push(limit, (page - 1) * limit);
+
+  const result = await db.query(query, values);
+
+  // Get total count
+  let countQuery = "SELECT COUNT(*) FROM projects WHERE 1=1";
+  const countValues = [];
+  let countParamCount = 1;
+
+  if (status) {
+    countQuery += ` AND status = $${countParamCount}`;
+    countValues.push(status);
+    countParamCount++;
+  }
+
+  if (search) {
+    countQuery += ` AND name ILIKE $${countParamCount}`;
+    countValues.push(`%${search}%`);
+  }
+
+  const countResult = await db.query(countQuery, countValues);
+  const total = parseInt(countResult.rows[0].count);
+
+  return {
+    projects: result.rows,
+    total,
+    pagination: {
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      limit,
+    },
+  };
+};
+
 module.exports = {
   create,
   findById,
   findByTenant,
+  findAll,
   update,
   deleteById,
   countByTenant,

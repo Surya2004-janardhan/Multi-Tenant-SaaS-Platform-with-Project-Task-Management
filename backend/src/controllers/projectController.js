@@ -12,8 +12,20 @@ const { AUDIT_ACTIONS, PROJECT_STATUS } = require("../utils/constants");
 
 const createProject = async (req, res, next) => {
   try {
-    const { tenantId, userId } = req.user;
+    const { tenantId, userId, role } = req.user;
     const { name, description } = req.body;
+
+    // Super admin cannot create projects (they have tenant_id = NULL)
+    // They can only view/manage existing tenant projects
+    if (role === "super_admin" || tenantId === null) {
+      return res
+        .status(403)
+        .json(
+          buildErrorResponse(
+            "Super admin cannot create projects. Please login as a tenant admin or user to create projects."
+          )
+        );
+    }
 
     // Check subscription limit
     const limitCheck = await checkProjectLimit(tenantId);
@@ -56,16 +68,28 @@ const createProject = async (req, res, next) => {
 
 const getProjectsByTenant = async (req, res, next) => {
   try {
-    const { tenantId } = req.user;
+    const { tenantId, role } = req.user;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const status = req.query.status || null;
 
-    const projects = await projectModel.findByTenant(tenantId, {
-      page,
-      limit,
-      status,
-    });
+    let projects;
+
+    // Super admin can see ALL projects from ALL tenants
+    if (role === "super_admin" || tenantId === null) {
+      projects = await projectModel.findAll({
+        page,
+        limit,
+        status,
+      });
+    } else {
+      // Regular users see only their tenant's projects
+      projects = await projectModel.findByTenant(tenantId, {
+        page,
+        limit,
+        status,
+      });
+    }
 
     return res.status(200).json(buildSuccessResponse(projects));
   } catch (error) {
@@ -75,11 +99,20 @@ const getProjectsByTenant = async (req, res, next) => {
 
 const getProjectById = async (req, res, next) => {
   try {
-    const { tenantId } = req.user;
+    const { tenantId, role } = req.user;
     const { id } = req.params;
 
-    const project = await projectModel.findById(id, tenantId);
+    const project = await projectModel.findById(id);
     if (!project) {
+      return res.status(404).json(buildErrorResponse("Project not found"));
+    }
+
+    // For non-super admins, verify project belongs to their tenant
+    if (
+      role !== "super_admin" &&
+      tenantId !== null &&
+      project.tenant_id !== tenantId
+    ) {
       return res.status(404).json(buildErrorResponse("Project not found"));
     }
 
@@ -91,9 +124,24 @@ const getProjectById = async (req, res, next) => {
 
 const updateProject = async (req, res, next) => {
   try {
-    const { tenantId, userId } = req.user;
+    const { tenantId, userId, role } = req.user;
     const { id } = req.params;
     const { name, description, status } = req.body;
+
+    // Verify project exists
+    const existingProject = await projectModel.findById(id);
+    if (!existingProject) {
+      return res.status(404).json(buildErrorResponse("Project not found"));
+    }
+
+    // For non-super admins, verify project belongs to their tenant
+    if (
+      role !== "super_admin" &&
+      tenantId !== null &&
+      existingProject.tenant_id !== tenantId
+    ) {
+      return res.status(404).json(buildErrorResponse("Project not found"));
+    }
 
     const updates = {};
     if (name) updates.name = name;
@@ -101,13 +149,10 @@ const updateProject = async (req, res, next) => {
     if (status) updates.status = status;
 
     const updatedProject = await projectModel.update(id, updates);
-    if (!updatedProject) {
-      return res.status(404).json(buildErrorResponse("Project not found"));
-    }
 
-    // Log action
+    // Log action (use project's tenant_id for super admin)
     await logAction({
-      tenantId,
+      tenantId: existingProject.tenant_id,
       userId,
       action: AUDIT_ACTIONS.UPDATE,
       entityType: "project",
@@ -127,17 +172,29 @@ const updateProject = async (req, res, next) => {
 
 const deleteProject = async (req, res, next) => {
   try {
-    const { tenantId, userId } = req.user;
+    const { tenantId, userId, role } = req.user;
     const { id } = req.params;
 
-    const deleted = await projectModel.deleteById(id, tenantId);
-    if (!deleted) {
+    // Verify project exists
+    const existingProject = await projectModel.findById(id);
+    if (!existingProject) {
       return res.status(404).json(buildErrorResponse("Project not found"));
     }
 
-    // Log action
+    // For non-super admins, verify project belongs to their tenant
+    if (
+      role !== "super_admin" &&
+      tenantId !== null &&
+      existingProject.tenant_id !== tenantId
+    ) {
+      return res.status(404).json(buildErrorResponse("Project not found"));
+    }
+
+    const deleted = await projectModel.deleteById(id);
+
+    // Log action (use project's tenant_id for super admin)
     await logAction({
-      tenantId,
+      tenantId: existingProject.tenant_id,
       userId,
       action: AUDIT_ACTIONS.DELETE,
       entityType: "project",

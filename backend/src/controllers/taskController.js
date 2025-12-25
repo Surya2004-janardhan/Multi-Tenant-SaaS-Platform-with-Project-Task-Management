@@ -16,9 +16,20 @@ const {
 
 const createTask = async (req, res, next) => {
   try {
-    const { tenantId, userId } = req.user;
+    const { tenantId, userId, role } = req.user;
     const { projectId, title, description, priority, dueDate, assignedTo } =
       req.body;
+
+    // Super admin cannot create tasks (they have tenant_id = NULL)
+    if (role === "super_admin" || tenantId === null) {
+      return res
+        .status(403)
+        .json(
+          buildErrorResponse(
+            "Super admin cannot create tasks. Please login as a tenant admin or user to create tasks."
+          )
+        );
+    }
 
     // Verify project exists and belongs to tenant
     const project = await projectModel.findById(projectId, tenantId);
@@ -59,7 +70,7 @@ const createTask = async (req, res, next) => {
 
 const getTasksByProject = async (req, res, next) => {
   try {
-    const { tenantId } = req.user;
+    const { tenantId, role } = req.user;
     const { projectId } = req.params;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -67,21 +78,28 @@ const getTasksByProject = async (req, res, next) => {
     const priority = req.query.priority || null;
     const assignedTo = req.query.assignedTo || null;
 
-    // Verify project exists and belongs to tenant
-    const project = await projectModel.findById(projectId, tenantId);
+    // Verify project exists
+    const project = await projectModel.findById(projectId);
     if (!project) {
       return res.status(404).json(buildErrorResponse("Project not found"));
     }
 
-    const tasks = await taskModel.findByProject(
-      projectId,
-      tenantId,
-      page,
-      limit,
+    // For non-super admins, verify project belongs to their tenant
+    if (
+      role !== "super_admin" &&
+      tenantId !== null &&
+      project.tenant_id !== tenantId
+    ) {
+      return res.status(404).json(buildErrorResponse("Project not found"));
+    }
+
+    const tasks = await taskModel.findByProject(projectId, {
       status,
       priority,
-      assignedTo
-    );
+      assignedTo,
+      page,
+      limit,
+    });
 
     return res.status(200).json(buildSuccessResponse(tasks));
   } catch (error) {
@@ -91,33 +109,50 @@ const getTasksByProject = async (req, res, next) => {
 
 const getAllTasks = async (req, res, next) => {
   try {
-    const { tenantId } = req.user;
+    const { tenantId, role } = req.user;
     const projectId = req.query.project_id || null;
     const status = req.query.status || null;
     const priority = req.query.priority || null;
     const assignedTo = req.query.assignedTo || null;
 
-    // If project_id is provided, filter by project
-    if (projectId) {
-      const tasks = await taskModel.findByProject(
-        projectId,
-        tenantId,
-        1,
-        100,
-        status,
-        priority,
-        assignedTo
-      );
-      return res.status(200).json(buildSuccessResponse(tasks));
-    }
+    let tasks;
 
-    // Otherwise get all tasks for tenant
-    const tasks = await taskModel.findByTenant(
-      tenantId,
-      status,
-      priority,
-      assignedTo
-    );
+    // Super admin can see ALL tasks from ALL tenants
+    if (role === "super_admin" || tenantId === null) {
+      if (projectId) {
+        tasks = await taskModel.findByProject(
+          projectId,
+          null, // null tenant means all tenants
+          1,
+          100,
+          status,
+          priority,
+          assignedTo
+        );
+      } else {
+        tasks = await taskModel.findAllTasks(status, priority, assignedTo);
+      }
+    } else {
+      // Regular users see only their tenant's tasks
+      if (projectId) {
+        tasks = await taskModel.findByProject(
+          projectId,
+          tenantId,
+          1,
+          100,
+          status,
+          priority,
+          assignedTo
+        );
+      } else {
+        tasks = await taskModel.findByTenant(
+          tenantId,
+          status,
+          priority,
+          assignedTo
+        );
+      }
+    }
 
     return res.status(200).json(buildSuccessResponse(tasks));
   } catch (error) {

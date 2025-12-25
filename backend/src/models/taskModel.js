@@ -190,11 +190,61 @@ const findByTenant = async (
   return result.rows;
 };
 
+const findAllTasks = async (
+  status = null,
+  priority = null,
+  assignedTo = null
+) => {
+  let query = `
+    SELECT t.*,
+           p.name as project_name,
+           tn.name as tenant_name,
+           tn.subdomain as tenant_subdomain,
+           u.full_name as assigned_user_name,
+           u.email as assigned_user_email
+    FROM tasks t
+    LEFT JOIN projects p ON t.project_id = p.id
+    LEFT JOIN tenants tn ON t.tenant_id = tn.id
+    LEFT JOIN users u ON t.assigned_to = u.id
+    WHERE 1=1
+  `;
+  const values = [];
+  let paramCount = 1;
+
+  if (status) {
+    query += ` AND t.status = $${paramCount}`;
+    values.push(status);
+    paramCount++;
+  }
+
+  if (priority) {
+    query += ` AND t.priority = $${paramCount}`;
+    values.push(priority);
+    paramCount++;
+  }
+
+  if (assignedTo) {
+    query += ` AND t.assigned_to = $${paramCount}`;
+    values.push(assignedTo);
+    paramCount++;
+  }
+
+  query += " ORDER BY";
+  query +=
+    " CASE t.priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END,";
+  query += " t.due_date ASC NULLS LAST,";
+  query += " t.created_at DESC";
+
+  const result = await db.query(query, values);
+  return result.rows;
+};
+
 module.exports = {
   create,
   findById,
   findByProject,
   findByTenant,
+  findAllTasks,
   update,
   deleteById,
 };

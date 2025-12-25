@@ -13,8 +13,19 @@ const { AUDIT_ACTIONS } = require("../utils/constants");
 
 const createUser = async (req, res, next) => {
   try {
-    const { tenantId } = req.user;
+    const { tenantId, role: userRole } = req.user;
     const { email, password, fullName, role } = req.body;
+
+    // Super admin cannot create users (they have tenant_id = NULL)
+    if (userRole === "super_admin" || tenantId === null) {
+      return res
+        .status(403)
+        .json(
+          buildErrorResponse(
+            "Super admin cannot create users. Please login as a tenant admin to create users."
+          )
+        );
+    }
 
     // Check subscription limit
     const limitCheck = await checkUserLimit(tenantId);
@@ -76,18 +87,31 @@ const createUser = async (req, res, next) => {
 
 const getUsersByTenant = async (req, res, next) => {
   try {
-    const { tenantId } = req.user;
+    const { tenantId, role: userRole } = req.user;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search || null;
     const role = req.query.role || null;
 
-    const users = await userModel.findByTenant(tenantId, {
-      page,
-      limit,
-      search,
-      role,
-    });
+    let users;
+
+    // Super admin can see ALL users from ALL tenants
+    if (userRole === "super_admin" || tenantId === null) {
+      users = await userModel.findAll({
+        page,
+        limit,
+        search,
+        role,
+      });
+    } else {
+      // Regular users see only their tenant's users
+      users = await userModel.findByTenant(tenantId, {
+        page,
+        limit,
+        search,
+        role,
+      });
+    }
 
     return res.status(200).json(buildSuccessResponse(users));
   } catch (error) {
