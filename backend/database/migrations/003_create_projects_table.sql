@@ -13,6 +13,6 @@ CREATE TABLE IF NOT EXISTS projects (
 );
 
 -- Create indexes for faster lookups
-CREATE INDEX idx_projects_tenant_id ON projects(tenant_id);
-CREATE INDEX idx_projects_created_by ON projects(created_by);
-CREATE INDEX idx_projects_status ON projects(status);
+CREATE INDEX IF NOT EXISTS idx_projects_tenant_id ON projects(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_projects_created_by ON projects(created_by);
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);

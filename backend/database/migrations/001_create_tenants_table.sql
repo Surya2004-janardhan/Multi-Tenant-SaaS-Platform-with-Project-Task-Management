@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS tenants (
 );
 
 -- Create index on subdomain for faster lookups
-CREATE INDEX idx_tenants_subdomain ON tenants(subdomain);
+CREATE INDEX IF NOT EXISTS idx_tenants_subdomain ON tenants(subdomain);
