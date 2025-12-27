@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "tailwindcss": "^3.4.0",
+    "typescript": "^4.9.5",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32"
   },
