@@ -8,31 +8,33 @@ require("dotenv").config();
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000; // 1 second delay between retries
 
-// Support both DATABASE_URL (Neon/Heroku/Render) and individual DB_* variables
-const pool = process.env.DATABASE_URL
-  ? new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000, // Increased to 10 seconds
-      keepAlive: true,
-      keepAliveInitialDelayMillis: 10000,
-    })
-  : new Pool({
-      host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT) || 5432,
-      database: process.env.DB_NAME || "saas_db",
-      user: process.env.DB_USER || "postgres",
-      password: String(process.env.DB_PASSWORD) || "postgres",
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
-      keepAlive: true,
-      keepAliveInitialDelayMillis: 10000,
-    });
+// Use Neon DB in production, local Docker DB in development
+const isProduction = process.env.NODE_ENV === "production";
+const localDbUrl = "postgresql://postgres:postgres@database:5432/saas_db";
+const neonDbUrl = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+
+const useDbUrl = isProduction ? neonDbUrl : localDbUrl;
+const isCloudDb =
+  useDbUrl &&
+  (useDbUrl.includes("neon.tech") ||
+    useDbUrl.includes("render.com") ||
+    useDbUrl.includes("aws.neon.tech"));
+
+const pool = new Pool({
+  connectionString: useDbUrl,
+  ...(isCloudDb
+    ? {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }
+    : {}),
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000,
+});
 
 pool.on("error", (err) => {
   console.error("⚠️ Unexpected error on idle client:", err.message);

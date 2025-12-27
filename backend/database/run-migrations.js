@@ -9,25 +9,30 @@ const { Pool } = require("pg");
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
-// Support both DATABASE_URL and individual DB_* variables
-const pool = process.env.DATABASE_URL
-  ? new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-      connectionTimeoutMillis: 10000,
-      keepAlive: true,
-    })
-  : new Pool({
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: String(process.env.DB_PASSWORD),
-      connectionTimeoutMillis: 10000,
-      keepAlive: true,
-    });
+// Use Neon DB in production, local Docker DB in development
+const isProduction = process.env.NODE_ENV === "production";
+const localDbUrl = "postgresql://postgres:postgres@database:5432/saas_db";
+const neonDbUrl = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+
+const useDbUrl = isProduction ? neonDbUrl : localDbUrl;
+const isCloudDb =
+  useDbUrl &&
+  (useDbUrl.includes("neon.tech") ||
+    useDbUrl.includes("render.com") ||
+    useDbUrl.includes("aws.neon.tech"));
+
+const pool = new Pool({
+  connectionString: useDbUrl,
+  ...(isCloudDb
+    ? {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }
+    : {}),
+  connectionTimeoutMillis: 10000,
+  keepAlive: true,
+});
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 

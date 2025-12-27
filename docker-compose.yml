@@ -1,18 +1,41 @@
 version: '3.8'
 
 services:
+
+  database:
+    image: postgres:15
+    container_name: database
+    environment:
+      POSTGRES_DB: saas_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - saas-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: ./backend
     container_name: backend
     ports:
       - "5000:5000"
     environment:
-      DATABASE_URL: postgresql://neondb_owner:npg_0SmC7eXqrcQV@ep-raspy-cherry-a1ltnd81-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+      DATABASE_URL: postgresql://postgres:postgres@database:5432/saas_db
       JWT_SECRET: your-super-secret-jwt-key-min-32-characters-long
       JWT_EXPIRES_IN: 24h
       PORT: 5000
       NODE_ENV: production
       FRONTEND_URL: http://frontend:3000
+    depends_on:
+      database:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/health"]
       interval: 10s
@@ -23,12 +46,15 @@ services:
       - saas-network
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_API_URL: /api
     container_name: frontend
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://backend:5000/api
+      REACT_APP_API_URL: /api
     depends_on:
       backend:
         condition: service_healthy
@@ -38,3 +64,5 @@ services:
 networks:
   saas-network:
     driver: bridge
+volumes:
+  db_data:
