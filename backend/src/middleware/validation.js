@@ -69,8 +69,12 @@ const validateLogin = (req, res, next) => {
     errors.push({ field: "password", message: "Password is required" });
   }
 
-  // Subdomain required for regular users, optional for super admin
-  if (email !== SUPER_ADMIN_EMAIL && !tenantSubdomain) {
+  // Subdomain required for regular users (check if undefined or null, not empty string)
+  // Super admin can have empty or missing subdomain
+  if (
+    email !== SUPER_ADMIN_EMAIL &&
+    (tenantSubdomain === undefined || tenantSubdomain === null)
+  ) {
     errors.push({
       field: "tenantSubdomain",
       message: "Tenant subdomain is required for non-admin users",
@@ -136,11 +140,19 @@ const validateCreateProject = (req, res, next) => {
 };
 
 const validateCreateTask = (req, res, next) => {
-  const { title } = req.body;
+  const { title, status } = req.body;
   const errors = [];
+  const VALID_STATUSES = ["todo", "in_progress", "completed"];
 
   if (!title || title.trim().length === 0) {
     errors.push({ field: "title", message: "Task title is required" });
+  }
+
+  if (status && !VALID_STATUSES.includes(status)) {
+    errors.push({
+      field: "status",
+      message: "Invalid status. Must be one of: todo, in_progress, completed",
+    });
   }
 
   if (errors.length > 0) {

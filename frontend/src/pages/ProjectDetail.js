@@ -59,10 +59,17 @@ const ProjectDetail = () => {
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      await taskService.updateStatus(taskId, newStatus);
-      loadProjectData();
+      console.log(`Updating task ${taskId} to status: ${newStatus}`);
+      const response = await taskService.updateStatus(taskId, newStatus);
+      console.log("Status update response:", response);
+      await loadProjectData();
     } catch (err) {
-      alert("Failed to update task status");
+      console.error("Status change error:", err);
+      alert(
+        `Failed to update task status: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
 
@@ -90,7 +97,7 @@ const ProjectDetail = () => {
   const tasksByStatus = {
     todo: tasks.filter((t) => t.status === "todo"),
     in_progress: tasks.filter((t) => t.status === "in_progress"),
-    done: tasks.filter((t) => t.status === "done"),
+    completed: tasks.filter((t) => t.status === "completed"),
   };
 
   return (
@@ -119,12 +126,14 @@ const ProjectDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {["todo", "in_progress", "done"].map((status) => (
+        {["todo", "in_progress", "completed"].map((status) => (
           <div key={status} className="bg-gray-50 rounded-lg p-4">
             <h3 className="font-bold text-gray-900 mb-1 flex justify-between items-center">
               <span>
                 {status === "in_progress"
                   ? "IN PROGRESS"
+                  : status === "completed"
+                  ? "COMPLETED"
                   : status.toUpperCase()}
               </span>
               <span className="bg-white px-2 py-1 rounded text-sm">
@@ -163,31 +172,45 @@ const ProjectDetail = () => {
                       Due: {new Date(task.due_date).toLocaleDateString()}
                     </small>
                   )}
-                  <div className="flex flex-wrap gap-1">
-                    {status !== "todo" && (
+                  <div className="flex flex-wrap gap-2">
+                    {status === "in_progress" && (
                       <button
-                        onClick={() =>
-                          handleStatusChange(
-                            task.id,
-                            status === "in_progress" ? "todo" : "in_progress"
-                          )
-                        }
-                        className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition"
+                        onClick={() => handleStatusChange(task.id, "todo")}
+                        className="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition font-semibold"
+                        title="Move to To Do"
                       >
-                        ←
+                        ← Todo
                       </button>
                     )}
-                    {status !== "done" && (
+                    {status === "completed" && (
                       <button
                         onClick={() =>
-                          handleStatusChange(
-                            task.id,
-                            status === "todo" ? "in_progress" : "done"
-                          )
+                          handleStatusChange(task.id, "in_progress")
                         }
-                        className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition"
+                        className="text-xs px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded transition font-semibold"
+                        title="Move to In Progress"
                       >
-                        →
+                        ← Progress
+                      </button>
+                    )}
+                    {status === "todo" && (
+                      <button
+                        onClick={() =>
+                          handleStatusChange(task.id, "in_progress")
+                        }
+                        className="text-xs px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded transition font-semibold"
+                        title="Move to In Progress"
+                      >
+                        Progress →
+                      </button>
+                    )}
+                    {status === "in_progress" && (
+                      <button
+                        onClick={() => handleStatusChange(task.id, "completed")}
+                        className="text-xs px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded transition font-semibold"
+                        title="Move to Completed"
+                      >
+                        Done →
                       </button>
                     )}
                     <button
