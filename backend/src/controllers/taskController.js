@@ -54,7 +54,7 @@ const createTask = async (req, res, next) => {
     await logAction({
       tenantId,
       userId,
-      action: AUDIT_ACTIONS.CREATE,
+      action: AUDIT_ACTIONS.CREATE_TASK,
       entityType: "task",
       entityId: task.id,
       ipAddress: req.ip,

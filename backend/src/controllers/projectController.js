@@ -52,7 +52,7 @@ const createProject = async (req, res, next) => {
     await logAction({
       tenantId,
       userId,
-      action: AUDIT_ACTIONS.CREATE,
+      action: AUDIT_ACTIONS.CREATE_PROJECT,
       entityType: "project",
       entityId: project.id,
       ipAddress: req.ip,

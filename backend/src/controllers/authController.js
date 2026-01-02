@@ -94,22 +94,23 @@ const login = async (req, res, next) => {
   try {
     const { email, password, tenantSubdomain } = req.body;
 
-    // Find tenant
-    const tenant = await tenantModel.findBySubdomain(tenantSubdomain);
-    if (!tenant) {
-      return res.status(404).json(buildErrorResponse("Tenant not found"));
-    }
+    // First, try to find super admin (tenant_id = NULL)
+    // Super admin can login with any subdomain
+    let user = await userModel.findByEmailWithPassword(email, null);
+    let tenant = null;
 
-    // Find user with password
-    // Super admin can login with any tenant subdomain
-    let user = await userModel.findByEmailWithPassword(email, tenant.id);
-
-    // If not found in tenant, check if it's a super admin
-    if (!user) {
-      const superAdmin = await userModel.findByEmailWithPassword(email, null);
-      if (superAdmin && superAdmin.role === "super_admin") {
-        user = superAdmin;
+    // If super admin found, allow login with any subdomain
+    if (user && user.role === "super_admin") {
+      // Super admin can login, tenant is optional
+    } else {
+      // For regular tenant users, find the tenant first
+      tenant = await tenantModel.findBySubdomain(tenantSubdomain);
+      if (!tenant) {
+        return res.status(404).json(buildErrorResponse("Tenant not found"));
       }
+
+      // Find user in this tenant
+      user = await userModel.findByEmailWithPassword(email, tenant.id);
     }
 
     if (!user) {
@@ -128,7 +129,7 @@ const login = async (req, res, next) => {
 
     // Log action
     await logAction({
-      tenantId: tenant.id,
+      tenantId: tokenTenantId,
       userId: user.id,
       action: AUDIT_ACTIONS.LOGIN,
       entityType: "user",

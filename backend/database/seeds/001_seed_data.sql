@@ -1,7 +1,7 @@
 -- Seed Data for Multi-Tenant SaaS Platform
 -- Demo login credentials from submission.json
--- ALL PASSWORDS: password123
--- Bcrypt hash (10 rounds): $2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u
+-- Password: password123 = $2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6
+-- Password: Admin@123 = $2a$10$fxkaxC0626CGOJun1K5eIeg4.CN7oVxatEI65Q54bT3sHCUq4lc9u
 
 -- Clear existing data (for development/testing purposes)
 DELETE FROM tasks;
@@ -26,28 +26,28 @@ VALUES
 
 -- Insert Super Admin User (system-wide access) if not exists
 -- Email: superadmin@system.com, Password: Admin@123
--- Bcrypt hash for Admin@123: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+-- Bcrypt hash for Admin@123: $2a$10$fxkaxC0626CGOJun1K5eIeg4.CN7oVxatEI65Q54bT3sHCUq4lc9u
 -- IMPORTANT: tenant_id MUST BE NULL for super_admin
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
 VALUES 
-(NULL, 'superadmin@system.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'Super Admin', 'super_admin')
+(NULL, 'superadmin@system.com', '$2a$10$fxkaxC0626CGOJun1K5eIeg4.CN7oVxatEI65Q54bT3sHCUq4lc9u', 'Super Admin', 'super_admin')
 ON CONFLICT DO NOTHING;
 
 -- Insert Tenant Users (MATCHES submission.json exactly)
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
 VALUES 
 -- TechCorp Users (tenant_id: 1)
-(1, 'admin@techcorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'Tech Admin', 'tenant_admin'),
-(1, 'john@techcorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'John Developer', 'user'),
-(1, 'sarah@techcorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'Sarah Designer', 'user'),
+(1, 'admin@techcorp.com', '$2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6', 'Tech Admin', 'tenant_admin'),
+(1, 'john@techcorp.com', '$2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6', 'John Developer', 'user'),
+(1, 'sarah@techcorp.com', '$2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6', 'Sarah Designer', 'user'),
 
 -- DesignHub Users (tenant_id: 2)
-(2, 'admin@designhub.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'Design Admin', 'tenant_admin'),
-(2, 'mike@designhub.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'Mike Designer', 'user'),
+(2, 'admin@designhub.com', '$2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6', 'Design Admin', 'tenant_admin'),
+(2, 'mike@designhub.com', '$2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6', 'Mike Designer', 'user'),
 
 -- AcmeCorp Users (tenant_id: 3) - ADDED TO MATCH submission.json
-(3, 'admin@acmecorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'Acme Admin', 'tenant_admin'),
-(3, 'developer@acmecorp.com', '$2b$10$rOj3aGJGVKxPkZvqJl6Lou6F7HhEi3Q1iBq8.Y.6bxZ1N1Y.7zX2u', 'John Developer', 'user')
+(3, 'admin@acmecorp.com', '$2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6', 'Acme Admin', 'tenant_admin'),
+(3, 'developer@acmecorp.com', '$2a$10$3O4vOVHxcMOroo7VWRxGOOaESdXSpDNqkO07pk/1fPgu4GY3NpXA6', 'John Developer', 'user')
 ON CONFLICT (tenant_id, email) DO NOTHING;
 
 -- Insert Projects (MATCHES submission.json)

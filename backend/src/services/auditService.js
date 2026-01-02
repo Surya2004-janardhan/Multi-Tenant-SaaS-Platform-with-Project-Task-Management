@@ -2,7 +2,6 @@
 // Handles audit logging for all actions
 
 const auditModel = require("../models/auditModel");
-const { generateUUID } = require("../utils/helpers");
 
 const logAction = async ({
   tenantId,
@@ -14,13 +13,13 @@ const logAction = async ({
 }) => {
   try {
     const auditLog = {
-      id: generateUUID(),
       tenant_id: tenantId || null,
       user_id: userId || null,
       action,
       entity_type: entityType || null,
       entity_id: entityId || null,
       ip_address: ipAddress || null,
+      details: null,
     };
 
     await auditModel.create(auditLog);

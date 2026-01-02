@@ -5,17 +5,17 @@ const db = require("../config/database");
 
 const create = async (auditLog) => {
   const query = `
-    INSERT INTO audit_logs (id, tenant_id, user_id, action, entity_type, entity_id, ip_address)
+    INSERT INTO audit_logs (tenant_id, user_id, action, entity_type, entity_id, details, ip_address)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING *
   `;
   const values = [
-    auditLog.id,
     auditLog.tenant_id,
     auditLog.user_id,
     auditLog.action,
     auditLog.entity_type,
     auditLog.entity_id,
+    auditLog.details,
     auditLog.ip_address,
   ];
   const result = await db.query(query, values);
