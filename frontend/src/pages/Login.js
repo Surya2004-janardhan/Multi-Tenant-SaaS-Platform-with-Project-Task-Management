@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const SUPER_ADMIN_EMAIL = "superadmin@system.com";
+
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -14,7 +16,35 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Check if entered email is super admin
+  const isSuperAdmin = formData.email === SUPER_ADMIN_EMAIL;
+
+  // Validate form before submission
+  const validateForm = () => {
+    if (!formData.email) {
+      setError("Email is required");
+      return false;
+    }
+    if (!formData.password) {
+      setError("Password is required");
+      return false;
+    }
+
+    // Subdomain required for regular users, optional for super admin
+    if (!isSuperAdmin && !formData.tenantSubdomain) {
+      setError(
+        "All fields are required. Subdomain is needed from backend to render on frontend."
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const handleChange = (e) => {
+    // Clear error when user starts typing
+    if (error) setError("");
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -24,10 +54,20 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await login(formData.email, formData.password, formData.tenantSubdomain);
+      // For super admin with empty subdomain, use "system"; otherwise use what user entered
+      const subdomain =
+        isSuperAdmin && !formData.tenantSubdomain
+          ? "system"
+          : formData.tenantSubdomain;
+      await login(formData.email, formData.password, subdomain);
       navigate("/dashboard");
     } catch (err) {
       setError(
@@ -58,29 +98,10 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
-              htmlFor="tenantSubdomain"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Tenant Subdomain
-            </label>
-            <input
-              type="text"
-              id="tenantSubdomain"
-              name="tenantSubdomain"
-              value={formData.tenantSubdomain}
-              onChange={handleChange}
-              placeholder="e.g., mycompany"
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
-            />
-          </div>
-
-          <div>
-            <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Email
+              Email <span className="text-red-600">*</span>
             </label>
             <input
               type="email"
@@ -92,6 +113,29 @@ const Login = () => {
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="tenantSubdomain"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Tenant Subdomain <span className="text-red-600">*</span>
+            </label>
+            <input
+              type="text"
+              id="tenantSubdomain"
+              name="tenantSubdomain"
+              value={formData.tenantSubdomain}
+              onChange={handleChange}
+              placeholder="e.g., demo, mycompany"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {isSuperAdmin
+                ? "Super Admin: Leave empty if needed (auto-filled with system)"
+                : "Your organization's subdomain (e.g., demo for demo.yourapp.com)"}
+            </p>
           </div>
 
           <div>

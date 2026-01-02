@@ -59,6 +59,7 @@ const validateRegistration = (req, res, next) => {
 const validateLogin = (req, res, next) => {
   const { email, password, tenantSubdomain } = req.body;
   const errors = [];
+  const SUPER_ADMIN_EMAIL = "superadmin@system.com";
 
   if (!email || !isValidEmail(email)) {
     errors.push({ field: "email", message: "Valid email is required" });
@@ -68,10 +69,11 @@ const validateLogin = (req, res, next) => {
     errors.push({ field: "password", message: "Password is required" });
   }
 
-  if (!tenantSubdomain) {
+  // Subdomain required for regular users, optional for super admin
+  if (email !== SUPER_ADMIN_EMAIL && !tenantSubdomain) {
     errors.push({
       field: "tenantSubdomain",
-      message: "Tenant subdomain is required",
+      message: "Tenant subdomain is required for non-admin users",
     });
   }
 
