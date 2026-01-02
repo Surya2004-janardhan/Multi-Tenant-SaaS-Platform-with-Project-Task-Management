@@ -110,7 +110,7 @@ const findByProject = async (
   };
 };
 
-const update = async (id, updates) => {
+const update = async (id, tenantId, updates) => {
   const fields = [];
   const values = [];
   let paramCount = 1;
@@ -124,12 +124,15 @@ const update = async (id, updates) => {
   });
 
   fields.push(`updated_at = CURRENT_TIMESTAMP`);
+
   values.push(id);
+  paramCount++;
+  values.push(tenantId);
 
   const query = `
     UPDATE tasks
     SET ${fields.join(", ")}
-    WHERE id = $${paramCount}
+    WHERE id = $${paramCount - 1} AND tenant_id = $${paramCount}
     RETURNING *
   `;
 
