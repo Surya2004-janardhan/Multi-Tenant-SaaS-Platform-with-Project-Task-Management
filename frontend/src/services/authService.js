@@ -5,6 +5,12 @@ export const authService = {
   // Register new tenant
   register: async (data) => {
     const response = await apiClient.post("/auth/register", data);
+    // Check if registration was successful
+    if (!response.data.success) {
+      const error = new Error(response.data.message || "Registration failed");
+      error.response = { data: response.data };
+      throw error;
+    }
     if (response.data.success && response.data.data.token) {
       localStorage.setItem("token", response.data.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.data.user));
@@ -19,6 +25,12 @@ export const authService = {
       password,
       tenantSubdomain,
     });
+    // Check if login was successful
+    if (!response.data.success) {
+      const error = new Error(response.data.message || "Login failed");
+      error.response = { data: response.data };
+      throw error;
+    }
     if (response.data.success && response.data.data.token) {
       localStorage.setItem("token", response.data.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.data.user));

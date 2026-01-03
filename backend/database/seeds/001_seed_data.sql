@@ -1,8 +1,8 @@
 -- Seed Data for Multi-Tenant SaaS Platform
 -- Credentials from requirements specification
--- Password: Admin@123 = $2a$10$fxkaxC0626CGOJun1K5eIeg4.CN7oVxatEI65Q54bT3sHCUq4lc9u
--- Password: Demo@123 = $2a$10$IW.E7/7Q9hh.pKgePCqYwOxm0MaQYlKhyHOZZqbgwWlCR8g8lnVrW
--- Password: User@123 = $2a$10$vkQ3Qz8qH5K6L9mR2X4pF.nZ0D8rY5tV1W2x3B4c5D6e7F8g9H0
+-- Password: Admin@123 = $2a$10$yFe6lDaWS7IWn9BT4TnEFu05QScjITqw9W2zG7KxHISWpuyLrQod6
+-- Password: Demo@123 = $2a$10$rhjOYXiNZtAH13dWj5qz1u4b5JxYOMCTCRwUm239.rXKak2XZbzhm
+-- Password: User@123 = $2a$10$goATjQ9PHxI56lGnAz/w1OT9FB9GUIpi5hwLMG1MzPDyuy1YS6gYO
 
 -- Clear existing data (for development/testing purposes)
 DELETE FROM tasks;
@@ -28,21 +28,21 @@ VALUES
 -- IMPORTANT: tenant_id MUST BE NULL for super_admin
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
 VALUES 
-(NULL, 'superadmin@system.com', '$2a$10$fxkaxC0626CGOJun1K5eIeg4.CN7oVxatEI65Q54bT3sHCUq4lc9u', 'Super Admin', 'super_admin');
+(NULL, 'superadmin@system.com', '$2a$10$yFe6lDaWS7IWn9BT4TnEFu05QScjITqw9W2zG7KxHISWpuyLrQod6', 'Super Admin', 'super_admin');
 
 -- Insert Demo Company Tenant Admin
 -- Email: admin@demo.com, Password: Demo@123
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
 VALUES 
-(1, 'admin@demo.com', '$2a$10$IW.E7/7Q9hh.pKgePCqYwOxm0MaQYlKhyHOZZqbgwWlCR8g8lnVrW', 'Demo Admin', 'tenant_admin');
+(1, 'admin@demo.com', '$2a$10$rhjOYXiNZtAH13dWj5qz1u4b5JxYOMCTCRwUm239.rXKak2XZbzhm', 'Demo Admin', 'tenant_admin');
 
 -- Insert Demo Company Regular Users
 -- User 1: user1@demo.com / User@123
 -- User 2: user2@demo.com / User@123
 INSERT INTO users (tenant_id, email, password_hash, full_name, role)
 VALUES 
-(1, 'user1@demo.com', '$2a$10$vkQ3Qz8qH5K6L9mR2X4pF.nZ0D8rY5tV1W2x3B4c5D6e7F8g9H0', 'Demo User One', 'user'),
-(1, 'user2@demo.com', '$2a$10$vkQ3Qz8qH5K6L9mR2X4pF.nZ0D8rY5tV1W2x3B4c5D6e7F8g9H0', 'Demo User Two', 'user');
+(1, 'user1@demo.com', '$2a$10$goATjQ9PHxI56lGnAz/w1OT9FB9GUIpi5hwLMG1MzPDyuy1YS6gYO', 'Demo User One', 'user'),
+(1, 'user2@demo.com', '$2a$10$goATjQ9PHxI56lGnAz/w1OT9FB9GUIpi5hwLMG1MzPDyuy1YS6gYO', 'Demo User Two', 'user');
 
 -- Insert Demo Company Projects (2 projects as per requirements)
 INSERT INTO projects (tenant_id, name, description, status, created_by)
