@@ -7,7 +7,7 @@
 -- Clear existing data (for development/testing purposes)
 DELETE FROM tasks;
 DELETE FROM projects;
-DELETE FROM users WHERE role != 'super_admin';
+DELETE FROM users;
 DELETE FROM tenants;
 DELETE FROM audit_logs;
 
