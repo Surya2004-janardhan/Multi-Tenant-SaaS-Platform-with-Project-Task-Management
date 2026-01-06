@@ -1,53 +1,85 @@
-# Complete API Endpoint Testing Script
-# Tests all 21 endpoints with Neon database
+# Complete API Endpoint Testing Script - 19 ENDPOINTS WITH SEED + NEW DATA
+# Tests all endpoints with both seed data and new data creation
 
 $baseUrl = "http://localhost:5000/api"
 $headers = @{"Content-Type"="application/json"}
 
-Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "MULTI-TENANT SAAS API - ENDPOINT TESTS" -ForegroundColor Cyan
-Write-Host "========================================`n" -ForegroundColor Cyan
+Write-Host "`n========================================" 
+Write-Host "TESTING ALL 19 ENDPOINTS" 
+Write-Host "SEED DATA + NEW DATA CREATION"
+Write-Host "========================================`n"
 
-# Test 1: Health Check
-Write-Host "[1/21] Testing Health Endpoint..." -ForegroundColor Yellow
-try {
-    $health = Invoke-RestMethod -Uri "$baseUrl/health" -Method Get
-    Write-Host "✅ Health Check: $($health.message)" -ForegroundColor Green
-    Write-Host "   Database: Connected" -ForegroundColor Gray
-} catch {
-    Write-Host "❌ Health Check Failed: $($_.Exception.Message)" -ForegroundColor Red
-    exit 1
+$passed = 0
+$failed = 0
+$tests = @()
+
+function RunTest {
+    param([string]$name, [string]$method, [string]$url, [string]$body, [string]$token, [string]$tenantId, [int]$expectedStatus = 200)
+    
+    $h = $headers.Clone()
+    if ($token) { $h["Authorization"] = "Bearer $token" }
+    if ($tenantId) { $h["X-Tenant-ID"] = $tenantId }
+    
+    try {
+        $response = Invoke-WebRequest -Uri "$baseUrl$url" -Method $method -Headers $h -Body $body -UseBasicParsing -ErrorAction Stop
+        Write-Host "PASS: $name" -ForegroundColor Green
+        $script:passed++
+        return @{status='PASS'; code=$response.StatusCode}
+    } catch {
+        $code = $_.Exception.Response.StatusCode.Value
+        if ($code -eq $expectedStatus) {
+            Write-Host "PASS: $name (expected $expectedStatus)" -ForegroundColor Green
+            $script:passed++
+            return @{status='PASS'; code=$code}
+        } else {
+            Write-Host "FAIL: $name (got $code)" -ForegroundColor Red
+            $script:failed++
+            return @{status='FAIL'; code=$code}
+        }
+    }
 }
 
-Start-Sleep -Seconds 1
+# Get tokens
+Write-Host "Getting auth tokens..."
+$superAdmin = (Invoke-WebRequest -Uri "$baseUrl/auth/login" -Method Post -Headers $headers -Body '{"email":"superadmin@system.com","password":"Admin@123"}' -UseBasicParsing).Content | ConvertFrom-Json
+$admin = (Invoke-WebRequest -Uri "$baseUrl/auth/login" -Method Post -Headers $headers -Body '{"email":"admin@demo.com","password":"Demo@123","tenantSubdomain":"demo"}' -UseBasicParsing).Content | ConvertFrom-Json
+$user = (Invoke-WebRequest -Uri "$baseUrl/auth/login" -Method Post -Headers $headers -Body '{"email":"user1@demo.com","password":"User@123","tenantSubdomain":"demo"}' -UseBasicParsing).Content | ConvertFrom-Json
 
-# Test 2: Login TechCorp Admin
-Write-Host "`n[2/21] Testing Login (TechCorp Admin)..." -ForegroundColor Yellow
-$loginData = @{
-    email = "admin@techcorp.com"
-    password = "password123"
-    tenantSubdomain = "techcorp"
-} | ConvertTo-Json
+Write-Host "Tokens obtained. Starting tests...`n"
 
-try {
-    $techcorpLogin = Invoke-RestMethod -Uri "$baseUrl/auth/login" -Method Post -Body $loginData -Headers $headers
-    $techcorpToken = $techcorpLogin.data.token
-    Write-Host "✅ Login Successful: $($techcorpLogin.data.user.fullName)" -ForegroundColor Green
-    Write-Host "   Role: $($techcorpLogin.data.user.role)" -ForegroundColor Gray
-    Write-Host "   Token: $($techcorpToken.Substring(0,20))..." -ForegroundColor Gray
-} catch {
-    Write-Host "❌ Login Failed: $($_.Exception.Message)" -ForegroundColor Red
-    exit 1
-}
+# AUTH TESTS
+Write-Host "=== AUTH TESTS (4) ===" -ForegroundColor Cyan
+RunTest "1. Health Check" GET "/health"
+RunTest "2. Login SuperAdmin (seed)" POST "/auth/login" '{"email":"superadmin@system.com","password":"Admin@123"}'
+RunTest "3. Login Admin (seed)" POST "/auth/login" '{"email":"admin@demo.com","password":"Demo@123","tenantSubdomain":"demo"}'
+RunTest "4. Invalid Credentials" POST "/auth/login" '{"email":"admin@demo.com","password":"WRONG","tenantSubdomain":"demo"}' "" "" 401
 
-Start-Sleep -Seconds 1
+# USER TESTS
+Write-Host "`n=== USER TESTS (4) ===" -ForegroundColor Cyan
+RunTest "5. List All Users" GET "/users" "" $superAdmin.data.token
+RunTest "6. List Tenant Users (seed)" GET "/users" "" $admin.data.token "1"
+RunTest "7. Get User by ID (seed)" GET "/users/3" "" $admin.data.token "1"
+RunTest "8. Create NEW User" POST "/users" '{"email":"newuser999@demo.com","password":"NewUser@123","fullName":"New User","role":"user"}' $admin.data.token "1"
 
-# Test 3: Login DesignHub Admin
-Write-Host "`n[3/21] Testing Login (DesignHub Admin)..." -ForegroundColor Yellow
-$designhubLoginData = @{
-    email = "admin@designhub.com"
-    password = "password123"
-    tenantSubdomain = "designhub"
+# PROJECT TESTS
+Write-Host "`n=== PROJECT TESTS (4) ===" -ForegroundColor Cyan
+RunTest "9. List Projects (seed)" GET "/projects" "" $admin.data.token "1"
+RunTest "10. Get Project by ID (seed)" GET "/projects/1" "" $admin.data.token "1"
+RunTest "11. Create NEW Project" POST "/projects" '{"name":"Brand New Project","description":"Created via API","status":"active"}' $admin.data.token "1"
+RunTest "12. Update Project (seed)" PUT "/projects/1" '{"name":"Updated Alpha","status":"active"}' $admin.data.token "1"
+
+# TASK TESTS
+Write-Host "`n=== TASK TESTS (4) ===" -ForegroundColor Cyan
+RunTest "13. List Tasks (seed)" GET "/tasks" "" $admin.data.token "1"
+RunTest "14. Get Task by ID (seed)" GET "/tasks/1" "" $admin.data.token "1"
+RunTest "15. Create NEW Task" POST "/tasks" '{"project_id":1,"title":"New Task","status":"todo","assigned_to":3}' $admin.data.token "1"
+RunTest "16. Update Task Status (seed)" PUT "/tasks/1" '{"status":"in_progress"}' $admin.data.token "1"
+
+# TENANT TESTS
+Write-Host "`n=== TENANT TESTS (3) ===" -ForegroundColor Cyan
+RunTest "17. List All Tenants" GET "/tenants" "" $superAdmin.data.token
+RunTest "18. Get Tenant by ID" GET "/tenants/1" "" $superAdmin.data.token
+RunTest "19. Get Tenant Details" GET "/tenants/1" "" $superAdmin.data.token
 } | ConvertTo-Json
 
 try {

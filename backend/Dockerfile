@@ -39,4 +39,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
     CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
 
 # Start application with initialization script
-CMD ["sh", "-c", "node database/run-migrations.js && node database/run-seeds.js && node src/index.js"]
+CMD ["sh", "-c", "node database/run-migrations.js && node database/seeds/seed.js && node src/index.js"]
