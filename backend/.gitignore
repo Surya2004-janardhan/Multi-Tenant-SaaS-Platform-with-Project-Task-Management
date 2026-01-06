@@ -78,3 +78,5 @@ Thumbs.db
 
 # Optional npm temporary files
 .npm-cache
+
+/src/generated/prisma

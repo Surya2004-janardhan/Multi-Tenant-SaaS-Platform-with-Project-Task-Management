@@ -1,0 +1,100 @@
+// Multi-Tenant SaaS Platform Schema
+// Uses Prisma ORM for consistent database operations
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  directUrl = env("DATABASE_URL")
+}
+
+model Tenant {
+  id               Int       @id @default(autoincrement())
+  name             String
+  subdomain        String    @unique
+  status           String    @default("active")
+  subscriptionPlan String    @default("free")
+  maxProjects      Int       @default(5)
+  maxUsers         Int       @default(10)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  users    User[]
+  projects Project[]
+  auditLogs AuditLog[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  tenantId     Int?     // NULL for super admin
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  role         String   // 'super_admin', 'tenant_admin', 'user'
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant   Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  projects Project[]
+  tasks    Task[]
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  tenantId    Int
+  name        String
+  description String?
+  status      String   @default("active")
+  createdBy   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  creator User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  tasks  Task[]
+  auditLogs AuditLog[]
+
+  @@map("projects")
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  title       String
+  description String?
+  status      String   @default("todo")
+  assignedTo  Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee User? @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
+  auditLogs AuditLog[]
+
+  @@map("tasks")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  tenantId  Int
+  userId    Int
+  action    String
+  entity    String
+  entityId  Int
+  changes   String?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [entityId], references: [id], onDelete: SetNull)
+  task Task? @relation(fields: [entityId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
